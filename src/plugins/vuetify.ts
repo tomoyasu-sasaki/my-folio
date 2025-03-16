@@ -5,6 +5,43 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 
+// カラーパレットの定義
+const blueColors = {
+    100: '#E3F2FD',
+    300: '#90CAF9',
+    400: '#64B5F6',
+    500: '#2196F3',
+    600: '#1E88E5',
+    700: '#1976D2',
+    800: '#1565C0',
+    900: '#0D47A1',
+    'A100': '#82B1FF',
+    'A200': '#448AFF'
+}
+
+// ダークテーマ用の特別なカラー
+const darkThemeColors = {
+    background: '#121212', // Material Design推奨のダークテーマ背景色
+    surface: '#1E1E1E',   // より明るい表面色
+    primary: '#90CAF9',   // 明るめのブルー（視認性向上）
+    secondary: '#64B5F6'  // アクセントとして使用
+}
+
+const statusColors = {
+    error: {
+        light: '#E53935', // Red 600
+        dark: '#EF5350'   // Red 400
+    },
+    warning: {
+        light: '#FB8C00', // Orange 600
+        dark: '#FFA726'   // Orange 400
+    },
+    success: {
+        light: '#43A047', // Green 600
+        dark: '#66BB6A'   // Green 400
+    }
+}
+
 export default createVuetify({
     components,
     directives,
@@ -16,31 +53,32 @@ export default createVuetify({
             light: {
                 dark: false,
                 colors: {
-                    background: '#E3F2FD', // 明るい青 (Blue 100)
-                    primary: '#2196F3', // ブルー (Blue 500)
-                    'primary-darken-1': '#1976D2', // ブルー濃いめ (Blue 700)
-                    secondary: '#90CAF9', // 明るいブルー (Blue 300)
-                    'secondary-darken-1': '#64B5F6', // ブルー濃いめ (Blue 400)
-                    error: '#E53935', // 赤 (Red 600)
-                    info: '#1E88E5', // 情報色 (Blue 600)
-                    warning: '#FB8C00', // 警告色 (Orange 600)
-                    success: '#43A047', // 成功色 (Green 600)
-                    accent: '#448AFF' // アクセント (Blue A200)
+                    background: blueColors[100],
+                    primary: blueColors[500],
+                    'primary-darken-1': blueColors[700],
+                    secondary: blueColors[300],
+                    'secondary-darken-1': blueColors[400],
+                    error: statusColors.error.light,
+                    info: blueColors[600],
+                    warning: statusColors.warning.light,
+                    success: statusColors.success.light,
+                    accent: blueColors['A200']
                 }
             },
             dark: {
                 dark: true,
                 colors: {
-                    background: '#0D47A1', // 非常に暗いブルー (Blue 900)
-                    primary: '#1565C0', // 暗いブルー (Blue 800)
-                    'primary-darken-1': '#0D47A1', // 非常に暗いブルー (Blue 900)
-                    secondary: '#1E88E5', // ブルー (Blue 600)
-                    'secondary-darken-1': '#1565C0', // 暗いブルー (Blue 800)
-                    error: '#EF5350', // 赤 (Red 400)
-                    info: '#42A5F5', // 情報色 (Blue 400)
-                    warning: '#FFA726', // 警告色 (Orange 400)
-                    success: '#66BB6A', // 成功色 (Green 400)
-                    accent: '#82B1FF' // アクセント (Blue A100)
+                    background: darkThemeColors.background,
+                    surface: darkThemeColors.surface,
+                    primary: darkThemeColors.primary,
+                    'primary-darken-1': blueColors[400],
+                    secondary: darkThemeColors.secondary,
+                    'secondary-darken-1': blueColors[300],
+                    error: statusColors.error.dark,
+                    info: blueColors['A100'],
+                    warning: statusColors.warning.dark,
+                    success: statusColors.success.dark,
+                    accent: blueColors['A100']
                 }
             }
         }

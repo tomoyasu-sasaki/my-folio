@@ -1,64 +1,174 @@
 <script setup lang="ts">
-import { useScrollStore } from '@/stores/scroll'
-import { useRouter } from 'vue-router'
+import { useScrollStore } from '../../../stores/scroll'
+import { useNavigationStore } from '../../../stores/navigation'
+import { computed } from 'vue'
 
-const store = useScrollStore()
-const router = useRouter()
+const scrollStore = useScrollStore()
+const navStore = useNavigationStore()
 
-const sections = [
-    { title: 'このサイトについて', target: 'About' },
-    { title: '成果物', target: 'Project' },
-    { title: '技術一覧', target: 'Skill' },
-    // { title: '最新ブログ', target: 'Blog' },
-    { title: '生成画像', target: 'Gallery' },
-    { title: '経歴', target: 'Carrer' }
-    // {title: 'お問い合わせ', target: 'Contact'},
-]
-const scrollToTarget = (sectionRef: string) => {
-    store.setSectionToScroll(sectionRef)
-}
-const openInNewTab = () => {
-    const url = router.resolve({ path: '/babylonfolio' }).href
-    window.open(url, '_blank')
-}
+const isScrolled = computed(() => window.scrollY > 0)
 </script>
 
 <template>
-    <v-app-bar style="background-color: transparent !important; box-shadow: none !important">
-        <v-spacer />
-        <v-row>
-            <v-col
-                cols="auto"
-                v-for="(section, index) in sections"
-                :key="index"
-                class="section-button"
-            >
-                <v-btn
-                    flat
-                    variant="elevated"
-                    color="background"
-                    @click.stop="scrollToTarget(section.target)"
-                    :text="section.title"
-                />
-            </v-col>
-            <v-col cols="auto">
-                <v-btn
-                    flat
-                    variant="elevated"
-                    color="background"
-                    target="_blank"
-                    text="BabylonJS"
-                    @click="openInNewTab"
-                />
-            </v-col>
-        </v-row>
+    <v-app-bar 
+        class="header-bar" 
+        elevation="0"
+        :color="isScrolled ? 'rgba(var(--v-theme-surface), 0.7)' : 'transparent'"
+    >
+        <v-container class="px-4">
+            <v-row justify="space-between" align="center" no-gutters>
+                <v-col cols="auto" class="d-md-none">
+                    <v-app-bar-nav-icon
+                        @click="navStore.toggleMobileMenu"
+                        :class="{ 'active': navStore.isMobileMenuOpen }"
+                    />
+                </v-col>
+
+                <v-col cols="auto" class="d-none d-md-flex section-buttons">
+                    <v-btn
+                        v-for="section in scrollStore.sections"
+                        :key="section.id"
+                        variant="text"
+                        :class="{ 'active-section': scrollStore.activeSection === section.id }"
+                        @click="scrollStore.scrollToSection(section.id)"
+                    >
+                        {{ section.title }}
+                    </v-btn>
+                </v-col>
+
+                <v-col cols="auto" class="external-links">
+                    <v-btn
+                        v-for="link in navStore.externalLinks"
+                        :key="link.id"
+                        variant="text"
+                        class="external-link"
+                        @click="navStore.openExternalLink(link.path)"
+                    >
+                        <v-icon v-if="link.icon" :icon="link.icon" class="mr-1" />
+                        {{ link.title }}
+                    </v-btn>
+                </v-col>
+            </v-row>
+        </v-container>
     </v-app-bar>
+
+    <v-navigation-drawer
+        v-model="navStore.isMobileMenuOpen"
+        location="left"
+        temporary
+        class="mobile-menu"
+        color="background"
+    >
+        <v-list>
+            <v-list-item
+                v-for="section in scrollStore.sections"
+                :key="section.id"
+                :class="{ 'active-section': scrollStore.activeSection === section.id }"
+                @click="() => {
+                    scrollStore.scrollToSection(section.id);
+                    navStore.closeMobileMenu();
+                }"
+            >
+                {{ section.title }}
+            </v-list-item>
+
+            <v-divider class="my-2" />
+
+            <v-list-item
+                v-for="link in navStore.externalLinks"
+                :key="link.id"
+                @click="navStore.openExternalLink(link.path)"
+            >
+                <template v-slot:prepend>
+                    <v-icon v-if="link.icon" :icon="link.icon" />
+                </template>
+                {{ link.title }}
+            </v-list-item>
+        </v-list>
+    </v-navigation-drawer>
 </template>
 
 <style scoped>
-@media (max-width: 860px) {
-    .section-button {
-        display: none;
+.header-bar {
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(var(--v-border-color), 0.08);
+    transition: all 0.3s ease;
+}
+
+.section-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.v-btn {
+    text-transform: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.v-btn:hover {
+    color: rgb(var(--v-theme-primary));
+    transform: translateY(-2px);
+}
+
+.active-section {
+    color: rgb(var(--v-theme-primary));
+    position: relative;
+}
+
+.active-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 2px;
+    background-color: rgb(var(--v-theme-primary));
+    border-radius: 2px;
+}
+
+.external-links {
+    display: flex;
+    gap: 8px;
+}
+
+.external-link {
+    display: flex;
+    align-items: center;
+}
+
+.mobile-menu {
+    .v-list-item {
+        min-height: 48px;
+        padding: 0 16px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            color: rgb(var(--v-theme-primary));
+            background-color: rgba(var(--v-theme-primary), 0.1);
+        }
+
+        &.active-section {
+            color: rgb(var(--v-theme-primary));
+            background-color: rgba(var(--v-theme-primary), 0.1);
+            font-weight: 500;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .header-bar {
+        height: 56px !important;
+    }
+
+    .external-links {
+        gap: 4px;
+    }
+
+    .v-btn {
+        padding: 0 12px;
     }
 }
 </style>

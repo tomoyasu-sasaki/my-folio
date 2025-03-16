@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import BabylonScene from '@/components/babylon/ForbiddenScene.vue'
+import BabylonScene from '../components/babylon/ForbiddenScene.vue'
 </script>
 
 <style scoped>

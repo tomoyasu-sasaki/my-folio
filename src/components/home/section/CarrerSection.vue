@@ -1,65 +1,145 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useCareerStore } from '@/stores/career'
+import type { CareerCategory } from '@/stores/career'
+import CareerTimelineItem from '../parts/CareerTimelineItem.vue'
+import { computed, ref } from 'vue'
 
-const careers = ref([
-    {
-        id: '01',
-        date: '2000/07',
-        title: '生まれる',
-        subtitle: '',
-        description: '埼玉県で生まれる'
-    },
-    {
-        id: '02',
-        date: '2019/03',
-        title: '高校卒業',
-        subtitle: 'いざ東京へ',
-        description:
-            '高校卒業の数日後に上京。日経新聞社社寮という名の大田区にあるボロボロの販売店に配属'
-    },
-    {
-        id: '03',
-        date: '2021/03',
-        title: '専門学校卒業',
-        subtitle: 'いざ札幌へ',
-        description:
-            '日本工学院専門学校の情報処理科システム開発コースを卒業し同時期に新聞奨学生も卒業'
-    },
-    {
-        id: '04',
-        date: '2021/04',
-        title: '第三者検証の企業に就職',
-        subtitle: '就職を機に札幌へ北上',
-        description: '日本ナレッジ株式会社札幌支社に就職。基幹業務システムの仕様追加等の業務に従事'
-    },
-    {
-        id: '05',
-        date: '2022/09',
-        title: '転職',
-        subtitle: '他の会社へ転職',
-        description: 'さまざまな案件を経験するために株式会社エスプランニングへ転職'
-    }
-])
+const careerStore = useCareerStore()
+const items = computed(() => careerStore.getAllItems)
+
+// カテゴリーフィルター
+const selectedCategory = ref<CareerCategory | null>(null)
+
+// カテゴリー一覧
+const categories = [
+    { value: null, label: 'すべて', icon: 'mdi-view-list' },
+    { value: 'education', label: '学歴', icon: 'mdi-school' },
+    { value: 'work', label: '職歴', icon: 'mdi-briefcase' },
+    { value: 'life', label: 'ライフイベント', icon: 'mdi-account-heart' }
+] as const
+
+// フィルター適用後のアイテム
+const filteredItems = computed(() => {
+    if (!selectedCategory.value) return items.value
+    return careerStore.getItemsByCategory(selectedCategory.value)
+})
 </script>
+
 <template>
-    <v-container id="carrerContainer" class="padding">
-        <v-timeline truncate-line="end">
-            <v-timeline-item v-for="career in careers" :key="career.id">
-                <template v-slot:opposite>
-                    {{ career.date }} <br />
-                    {{ career.subtitle }}
-                </template>
-                <div>
-                    <div class="text-h6">{{ career.title }}</div>
-                    <p>{{ career.description }}</p>
-                </div>
-            </v-timeline-item>
+    <v-container id="careerContainer" class="padding">
+        <!-- フィルターセクション -->
+        <v-row class="mb-8">
+            <v-col cols="12" class="d-flex justify-center">
+                <v-btn-toggle
+                    v-model="selectedCategory"
+                    mandatory
+                    color="primary"
+                    class="career-filter"
+                >
+                    <v-btn
+                        v-for="category in categories"
+                        :key="category.value || 'all'"
+                        :value="category.value"
+                        variant="text"
+                        class="filter-btn"
+                    >
+                        <v-icon :icon="category.icon" class="mr-1" />
+                        <span class="btn-text">{{ category.label }}</span>
+                    </v-btn>
+                </v-btn-toggle>
+            </v-col>
+        </v-row>
+
+        <!-- タイムライン -->
+        <v-timeline 
+            side="end" 
+            truncate-line="start" 
+            class="career-timeline"
+            density="comfortable"
+            align="start"
+        >
+            <CareerTimelineItem
+                v-for="item in filteredItems"
+                :key="item.id"
+                :item="item"
+            />
         </v-timeline>
     </v-container>
 </template>
+
 <style scoped>
 .padding {
     padding-top: 100px;
     padding-bottom: 100px;
+}
+
+.career-filter {
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.career-timeline {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+    width: 100%;
+}
+
+.filter-btn {
+    min-width: 100px;
+    padding: 0 16px;
+}
+
+@media (max-width: 600px) {
+    .padding {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    .career-filter {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        gap: 8px;
+        background-color: transparent;
+    }
+
+    .filter-btn {
+        min-width: calc(50% - 4px);
+        margin: 0 !important;
+        border-radius: 4px;
+    }
+
+    .btn-text {
+        font-size: 0.875rem;
+    }
+
+    .career-timeline {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    :deep(.v-timeline) {
+        width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .filter-btn {
+        min-width: 100%;
+    }
+
+    .career-timeline {
+        padding: 0;
+    }
+
+    :deep(.v-timeline) {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
 }
 </style>

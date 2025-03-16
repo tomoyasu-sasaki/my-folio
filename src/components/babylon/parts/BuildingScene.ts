@@ -3,17 +3,17 @@ import * as BABYLON from '@babylonjs/core'
 // GLTFやGLBを読み込む場合
 import '@babylonjs/loaders'
 
-import { createCamera } from '@/components/babylon/parts/createCamera'
-import { setupLights } from '@/components/babylon/parts/setupLights'
-import { setupEnvironment } from '@/components/babylon/parts/setupEnvironment'
-import { createMaterials } from '@/components/babylon/parts/createMaterials'
-import type { Materials } from '@/components/babylon/parts/createMaterials'
-import { createGroundAndWalls } from '@/components/babylon/parts/createGroundAndWalls'
-import { loadModels } from '@/components/babylon/parts/loadModels'
-import { setupElevatorUI } from '@/components/babylon/parts/setupElevatorUI'
-import { setupFloorUI } from '@/components/babylon/parts/setupFloorUI'
-import { setupStairTrigger } from '@/components/babylon/parts/setupStairTrigger'
-// import { animateCameraUpStairs } from '@/components/babylon/parts/animateCameraUpStairs'
+import { createCamera } from './createCamera'
+import { setupLights } from './setupLights'
+import { setupEnvironment } from './setupEnvironment'
+import { createMaterials } from './createMaterials'
+import type { Materials } from './createMaterials'
+import { createGroundAndWalls } from './createGroundAndWalls'
+import { loadModels } from './loadModels'
+import { setupElevatorUI } from './setupElevatorUI'
+import { setupFloorUI } from './setupFloorUI'
+import { setupStairTrigger } from './setupStairTrigger'
+// import { animateCameraUpStairs } from './animateCameraUpStairs'
 
 export class BuildingScene {
     private canvas: HTMLCanvasElement

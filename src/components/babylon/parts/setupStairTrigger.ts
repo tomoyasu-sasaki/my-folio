@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core'
-import { animateCameraUpStairs } from '@/components/babylon/parts/animateCameraUpStairs'
+import { animateCameraUpStairs } from './animateCameraUpStairs'
 
 export function setupStairTrigger(
     scene: BABYLON.Scene,

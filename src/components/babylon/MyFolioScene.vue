@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { BuildingScene } from '@/components/babylon/parts/BuildingScene'
+import { BuildingScene } from './parts/BuildingScene'
 
 onMounted(() => {
     const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement

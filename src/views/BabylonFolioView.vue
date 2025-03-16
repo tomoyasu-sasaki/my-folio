@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import MyFolioScene from '@/components/babylon/MyFolioScene.vue'
+import MyFolioScene from '../components/babylon/MyFolioScene.vue'
 </script>
 
 <style scoped></style>

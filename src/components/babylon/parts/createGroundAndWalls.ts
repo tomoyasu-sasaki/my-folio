@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core'
-import type { Materials } from '@/components/babylon/parts/createMaterials'
+import type { Materials } from './createMaterials'
 
 interface WallOptions {
     width: number

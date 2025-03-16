@@ -1,42 +1,83 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-const icons = ref([
-    { logo: 'mdi-facebook', link: 'https://www.facebook.com/profile.php?id=100093524602921' },
-    { logo: 'mdi-twitter', link: 'https://qiita.com/ssk_tmys' },
-    // { logo: 'mdi-github', link: 'https://github.com/sasaki-tmys' },
-    {
-        logo: 'mdi-instagram',
-        link: 'https://instagram.com/ssk_tmys?utm_source=qr&igshid=MzNlNGNkZWQ4Mg%3D%3D'
-    }
-])
+import { useSocialStore } from '../../stores/social'
+import { computed } from 'vue'
 
-const openOtherApplication = (link: string) => {
-    window.open(link, '_blank')
+const store = useSocialStore()
+
+const currentYear = computed(() => new Date().getFullYear())
+
+const openSocialLink = (link: string) => {
+    window.open(link, '_blank', 'noopener,noreferrer')
 }
 </script>
 
 <style scoped>
-.v-footer {
+.footer {
     text-align: center;
     display: flex;
-    padding: 0%;
+    padding: 16px 0;
     flex-direction: column;
+    gap: 12px;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.social-button {
+    transition: transform 0.2s ease-in-out;
+}
+
+.social-button:hover {
+    transform: translateY(-2px);
+    color: rgb(var(--v-theme-primary));
+}
+
+.copyright {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 12px 0;
+        gap: 8px;
+    }
+
+    .social-links {
+        gap: 4px;
+    }
+
+    .copyright {
+        font-size: 0.8rem;
+    }
 }
 </style>
 <template>
-    <v-footer color="background" class="pb-4">
-        <div>
-            <v-btn
-                v-for="(icon, index) in icons"
-                :key="index"
-                variant="text"
-                :icon="icon.logo"
-                size="x-large"
-                @click.stop="openOtherApplication(icon.link)"
-            />
+    <v-footer color="background" class="footer">
+        <div class="social-links">
+            <v-tooltip
+                v-for="link in store.socialLinks"
+                :key="link.id"
+                :text="link.label"
+                location="top"
+            >
+                <template v-slot:activator="{ props }">
+                    <v-btn
+                        v-bind="props"
+                        variant="text"
+                        :icon="link.logo"
+                        size="x-large"
+                        class="social-button"
+                        @click.stop="openSocialLink(link.link)"
+                    />
+                </template>
+            </v-tooltip>
         </div>
-        <div>
-            Copyright© {{ new Date().getFullYear() }} — <strong>ssk-tmysのポートフォリオ</strong>
+        <div class="copyright">
+            Copyright© {{ currentYear }} — <strong>ssk-tmysのポートフォリオ</strong>
         </div>
     </v-footer>
 </template>
