@@ -6,23 +6,102 @@ export interface Materials {
     wallMaterial: BABYLON.StandardMaterial
 }
 
+interface TextureConfig {
+    path: string
+    uScale: number
+    vScale: number
+}
+
+interface MaterialsConfig {
+    floor: TextureConfig
+    wall: TextureConfig
+}
+
+const MATERIALS_CONFIG: MaterialsConfig = {
+    floor: {
+        path: 'models/textures/WoodFloor.jpg',
+        uScale: 4,
+        vScale: 4
+    },
+    wall: {
+        path: 'models/textures/ConcreteWall.jpg',
+        uScale: 2,
+        vScale: 1
+    }
+}
+
+/**
+ * シーンのマテリアルを作成します
+ * @param scene - Babylonのシーンオブジェクト
+ * @returns 作成されたマテリアル群
+ */
 export function createMaterials(scene: BABYLON.Scene): Materials {
-    const floorTexture = new BABYLON.Texture('models/textures/WoodFloor.jpg', scene)
-    floorTexture.uScale = 4
-    floorTexture.vScale = 4
-
-    const wallTexture = new BABYLON.Texture('models/textures/ConcreteWall.jpg', scene)
-    wallTexture.uScale = 2
-    wallTexture.vScale = 1
-
-    const groundMaterial = new BABYLON.StandardMaterial('groundMat', scene)
-    groundMaterial.diffuseTexture = floorTexture
-
-    const wallMaterial = new BABYLON.StandardMaterial('wallMat', scene)
-    wallMaterial.diffuseTexture = wallTexture
+    if (!scene) {
+        throw new Error('シーンが提供されていません')
+    }
 
     return {
-        groundMaterial,
-        wallMaterial
+        groundMaterial: createFloorMaterial(scene),
+        wallMaterial: createWallMaterial(scene)
     }
+}
+
+/**
+ * 床用のマテリアルを作成します
+ */
+function createFloorMaterial(scene: BABYLON.Scene): BABYLON.StandardMaterial {
+    const material = new BABYLON.StandardMaterial('groundMat', scene)
+    const texture = createTexture(scene, MATERIALS_CONFIG.floor)
+    material.diffuseTexture = texture
+    return material
+}
+
+/**
+ * 壁用のマテリアルを作成します
+ */
+function createWallMaterial(scene: BABYLON.Scene): BABYLON.StandardMaterial {
+    const material = new BABYLON.StandardMaterial('wallMat', scene)
+    const texture = createTexture(scene, MATERIALS_CONFIG.wall)
+    material.diffuseTexture = texture
+    return material
+}
+
+/**
+ * テクスチャを作成し、スケールを設定します
+ */
+function createTexture(
+    scene: BABYLON.Scene,
+    config: TextureConfig
+): BABYLON.Texture {
+    try {
+        const texture = new BABYLON.Texture(config.path, scene)
+        texture.uScale = config.uScale
+        texture.vScale = config.vScale
+        
+        // テクスチャ読み込みエラーのハンドリング
+        texture.onLoadObservable.add((texture) => {
+            if (!texture.isReady()) {
+                console.warn(`テクスチャの読み込みに失敗しました: ${config.path}`)
+            }
+        })
+
+        return texture
+    } catch (error) {
+        console.error(`テクスチャの作成中にエラーが発生しました: ${config.path}`, error)
+        // フォールバックテクスチャを作成（白色）
+        const fallbackTexture = new BABYLON.Texture('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', scene)
+        return fallbackTexture
+    }
+}
+
+/**
+ * マテリアルのクリーンアップを行います
+ */
+export function disposeMaterials(materials: Materials): void {
+    Object.values(materials).forEach(material => {
+        if (material.diffuseTexture) {
+            material.diffuseTexture.dispose()
+        }
+        material.dispose()
+    })
 }
