@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useLanguageStore } from '@/stores/language'
 
-const title = ref('このサイトについて')
-const description = ref([
-    '勉強の内容や成果物を公開するサイトです。',
-    '経歴やスキルなども公開しています。'
-])
+const languageStore = useLanguageStore()
 </script>
 
 <template>
@@ -35,11 +31,11 @@ const description = ref([
 
                 <!-- タイトルと説明セクション -->
                 <div class="content-section">
-                    <h1 class="text-h3 font-weight-bold mb-6">{{ title }}</h1>
+                    <h1 class="text-h3 font-weight-bold mb-6">{{ languageStore.t('about', 'title') }}</h1>
                     <v-card variant="text" class="description-card">
                         <v-card-text>
-                            <p v-for="(text, index) in description" :key="index" class="description-text">
-                                {{ text }}
+                            <p v-for="(_, index) in languageStore.translations.about.ja.description" :key="index" class="description-text">
+                                {{ languageStore.t('about', 'description', index.toString()) }}
                             </p>
                         </v-card-text>
                     </v-card>

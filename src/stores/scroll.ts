@@ -4,7 +4,7 @@ import { ref } from 'vue'
 export interface Section {
     id: string
     title: string
-    ref?: HTMLElement | null
+    ref?: HTMLElement
 }
 
 export const useScrollStore = defineStore('scroll', () => {

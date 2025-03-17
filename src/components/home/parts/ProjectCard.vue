@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Project } from '@/stores/project'
+import { useLanguageStore } from '@/stores/language'
 
 defineProps<{
     project: Project
 }>()
+
+const languageStore = useLanguageStore()
 
 const statusColors = {
     completed: 'success',
@@ -12,12 +15,6 @@ const statusColors = {
     end: 'error'
 } as const
 
-const statusLabels = {
-    completed: '完了',
-    'in-progress': '開発中',
-    planned: '計画中',
-    end: '終了'
-} as const
 
 function openOtherService(url: string) {
     if (url) {
@@ -44,7 +41,7 @@ function openOtherService(url: string) {
                 class="ml-2"
                 label
             >
-                {{ statusLabels[project.status] }}
+                {{ languageStore.t('project', 'status', project.status) }}
             </v-chip>
         </v-card-title>
 
@@ -72,7 +69,7 @@ function openOtherService(url: string) {
                 @click="openOtherService(project.url)"
                 prepend-icon="mdi-open-in-new"
             >
-                詳細
+                {{ languageStore.t('project', 'details') }}
             </v-btn>
         </v-card-actions>
     </v-card>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useScrollStore } from '../../../stores/scroll'
 import { useNavigationStore } from '../../../stores/navigation'
+import { useLanguageStore } from '../../../stores/language'
 import { computed } from 'vue'
 
 const scrollStore = useScrollStore()
 const navStore = useNavigationStore()
+const languageStore = useLanguageStore()
 
 const isScrolled = computed(() => window.scrollY > 0)
 </script>
@@ -32,11 +34,20 @@ const isScrolled = computed(() => window.scrollY > 0)
                         :class="{ 'active-section': scrollStore.activeSection === section.id }"
                         @click="scrollStore.scrollToSection(section.id)"
                     >
-                        {{ section.title }}
+                        {{ languageStore.t('navigation', section.id) }}
                     </v-btn>
                 </v-col>
 
                 <v-col cols="auto" class="external-links">
+                    <v-btn
+                        variant="text"
+                        class="language-toggle-btn"
+                        @click="languageStore.toggleLanguage"
+                    >
+                        <v-icon icon="mdi-translate" class="mr-1" />
+                        {{ languageStore.t('languageSwitch', 'switchToOther') }}
+                    </v-btn>
+
                     <v-btn
                         v-for="link in navStore.externalLinks"
                         :key="link.id"
@@ -69,10 +80,17 @@ const isScrolled = computed(() => window.scrollY > 0)
                     navStore.closeMobileMenu();
                 }"
             >
-                {{ section.title }}
+                {{ languageStore.t('navigation', section.id) }}
             </v-list-item>
 
             <v-divider class="my-2" />
+
+            <v-list-item @click="languageStore.toggleLanguage">
+                <template v-slot:prepend>
+                    <v-icon icon="mdi-translate" />
+                </template>
+                {{ languageStore.t('languageSwitch', 'otherLanguage') }}
+            </v-list-item>
 
             <v-list-item
                 v-for="link in navStore.externalLinks"
@@ -139,6 +157,15 @@ const isScrolled = computed(() => window.scrollY > 0)
     align-items: center;
 }
 
+.language-toggle-btn {
+    display: flex;
+    align-items: center;
+    background-color: rgba(var(--v-theme-primary), 0.1);
+    margin-right: 8px;
+    border-radius: 20px;
+    padding: 0 12px;
+}
+
 .mobile-menu {
     .v-list-item {
         min-height: 48px;
@@ -169,6 +196,10 @@ const isScrolled = computed(() => window.scrollY > 0)
 
     .v-btn {
         padding: 0 12px;
+    }
+    
+    .language-toggle-btn {
+        margin-right: 4px;
     }
 }
 </style>
