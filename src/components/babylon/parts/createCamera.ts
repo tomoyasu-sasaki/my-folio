@@ -1,63 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
-
-interface CameraControls {
-    keysUp?: number[]
-    keysDown?: number[]
-    keysLeft?: number[]
-    keysRight?: number[]
-    mouseSensitivity?: number
-}
-
-interface ViewLimits {
-    minBeta?: number
-    maxBeta?: number
-    minAlpha?: number
-    maxAlpha?: number
-}
-
-interface ObstacleAvoidanceOptions {
-    rayLength?: number
-    layerMask?: number
-    adjustSpeed?: number
-}
-
-interface CameraOptions {
-    speed?: number
-    minY?: number
-    xLimit?: number
-    zLimit?: number
-    checkCollisions?: boolean
-    applyGravity?: boolean
-    controls?: CameraControls
-    viewLimits?: ViewLimits
-    obstacleAvoidance?: ObstacleAvoidanceOptions
-    mode?: 'fps' | 'tps'
-}
-
-interface CameraState {
-    position: BABYLON.Vector3
-    rotation: BABYLON.Vector3
-    target?: BABYLON.Vector3
-}
-
-const DEFAULT_OPTIONS: CameraOptions = {
-    speed: 0.2,
-    minY: 1.6,
-    xLimit: 3.2,
-    zLimit: 8.2,
-    checkCollisions: false,
-    applyGravity: false,
-    controls: {
-        mouseSensitivity: 2000.0
-    },
-    viewLimits: {
-        minBeta: 0.1,
-        maxBeta: Math.PI / 2,
-        minAlpha: -Math.PI,
-        maxAlpha: Math.PI
-    },
-    mode: 'fps'
-}
+import type { CameraOptions, CameraControls, ViewLimits, ObstacleAvoidanceOptions, CameraState } from '../types'
+import { DEFAULT_OPTIONS } from '../types'
 
 /**
  * 3D空間内にカメラを作成し、移動制限を設定します
@@ -150,16 +93,16 @@ function setupViewLimits(
 ): void {
     if (!limits) return
 
-    camera.onAfterCheckInputsObservable.add(() => {
-        const rotation = camera.rotation
-        if (limits.minBeta !== undefined && limits.maxBeta !== undefined) {
-            rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
-        }
-        if (limits.minAlpha !== undefined && limits.maxAlpha !== undefined) {
-            rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
-        }
-        camera.rotation = rotation
-    })
+    // camera.onAfterCheckInputsObservable.add(() => {
+    //     const rotation = camera.rotation
+    //     if (limits.minBeta !== undefined && limits.maxBeta !== undefined) {
+    //         rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
+    //     }
+    //     if (limits.minAlpha !== undefined && limits.maxAlpha !== undefined) {
+    //         rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
+    //     }
+    //     camera.rotation = rotation
+    // })
 }
 
 /**

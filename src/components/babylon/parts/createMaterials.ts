@@ -1,35 +1,7 @@
 // createMaterials.ts
 import * as BABYLON from '@babylonjs/core'
-
-export interface Materials {
-    groundMaterial: BABYLON.StandardMaterial
-    wallMaterial: BABYLON.StandardMaterial
-}
-
-interface TextureConfig {
-    path: string
-    uScale: number
-    vScale: number
-}
-
-interface MaterialsConfig {
-    floor: TextureConfig
-    wall: TextureConfig
-}
-
-const MATERIALS_CONFIG: MaterialsConfig = {
-    floor: {
-        path: 'models/textures/WoodFloor.jpg',
-        uScale: 4,
-        vScale: 4
-    },
-    wall: {
-        path: 'models/textures/ConcreteWall.jpg',
-        uScale: 2,
-        vScale: 1
-    }
-}
-
+import type { Materials, TextureConfig } from '../types'
+import { MATERIALS_CONFIG } from '../types'
 /**
  * シーンのマテリアルを作成します
  * @param scene - Babylonのシーンオブジェクト

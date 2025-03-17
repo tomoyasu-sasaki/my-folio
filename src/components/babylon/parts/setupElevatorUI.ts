@@ -1,46 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
 import * as GUI from '@babylonjs/gui'
-
-interface FloorInfo {
-    floor: number
-    section: string
-}
-
-interface ElevatorUIComponents {
-    panel: GUI.StackPanel
-    label: GUI.TextBlock
-    buttons: GUI.Button[]
-}
-
-const FLOOR_CONFIG: FloorInfo[] = [
-    { floor: 1, section: '1階（ロビー）' },
-    { floor: 2, section: '2階（自己紹介）' },
-    { floor: 3, section: '3階（プロジェクト）' },
-    { floor: 4, section: '4階（スキルセット）' },
-    { floor: 5, section: '5階（連絡先）' }
-]
-
-const UI_SETTINGS = {
-    panel: {
-        width: '220px'
-    },
-    label: {
-        height: '40px',
-        color: 'white',
-        fontSize: 24,
-        text: '何階へ行きますか？'
-    },
-    button: {
-        width: '400px',
-        height: '50px',
-        color: 'white',
-        fontSize: 24,
-        background: 'gray'
-    },
-    interaction: {
-        elevatorDistance: 3
-    }
-} as const
+import type { ElevatorUIComponents, FloorInfo } from '../types'
+import { FLOOR_INFO, UI_SETTINGS } from '../types'
 
 /**
  * エレベーターUIをセットアップします
@@ -81,7 +42,7 @@ function createElevatorUIComponents(
     const label = createLabel()
     panel.addControl(label)
 
-    const availableFloors = FLOOR_CONFIG.filter(f => f.floor !== currentFloor)
+    const availableFloors = FLOOR_INFO.filter(f => f.floor !== currentFloor)
     const buttons = createFloorButtons(availableFloors, moveToFloor, panel)
 
     return { panel, label, buttons }

@@ -1,31 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
-import type { Materials } from './createMaterials'
-
-interface WallOptions {
-    width: number
-    height: number
-    sideOrientation: number
-}
-
-interface FloorConfig {
-    yOffset: number
-    groundWidth: number
-    groundHeight: number
-    upperGroundWidth1: number
-    upperGroundHeight1: number
-    upperGroundWidth2: number
-    upperGroundHeight2: number
-}
-
-const FLOOR_CONFIG: FloorConfig = {
-    yOffset: 0,
-    groundWidth: 10,
-    groundHeight: 20,
-    upperGroundWidth1: 7.3,
-    upperGroundHeight1: 20,
-    upperGroundWidth2: 2.7,
-    upperGroundHeight2: 12
-}
+import type { Materials } from '../types'
+import type { FloorConfig, WallOptions } from '../types'
+import { FLOOR_CONFIG } from '../types'
 
 /**
  * 地面と壁を作成します

@@ -1,25 +1,6 @@
 // setupEnvironment.ts
 import * as BABYLON from '@babylonjs/core'
-
-interface EnvironmentConfig {
-    hdrTexture: {
-        path: string
-        size: number
-    }
-    scene: {
-        intensity: number
-    }
-}
-
-const ENVIRONMENT_CONFIG: EnvironmentConfig = {
-    hdrTexture: {
-        path: 'models/textures/environment.hdr',
-        size: 512
-    },
-    scene: {
-        intensity: 1.5
-    }
-} as const
+import { ENVIRONMENT_CONFIG } from '../types'
 
 /**
  * シーンの環境設定を行います

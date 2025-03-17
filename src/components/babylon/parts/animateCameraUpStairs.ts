@@ -1,40 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
+import type { AnimationConfig, AnimationState } from '../types'
 
-interface AnimationState {
-    value: boolean
-}
-
-interface AnimationConfig {
-    position: {
-        name: string
-        property: string
-        frameRate: number
-        type: number
-        loopMode: number
-        frames: number[]
-        startPosition: BABYLON.Vector3
-        steps: Array<{
-            deltaX: number
-            deltaY: number
-            deltaZ: number
-        }>
-    }
-    rotation: {
-        name: string
-        property: string
-        frameRate: number
-        type: number
-        loopMode: number
-        frames: number[]
-        startRotation: {
-            x: number
-            y: number
-        }
-        steps: Array<{
-            deltaY: number
-        }>
-    }
-}
 
 const ANIMATION_CONFIG: AnimationConfig = {
     position: {

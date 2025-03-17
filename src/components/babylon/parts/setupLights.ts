@@ -1,26 +1,5 @@
 import * as BABYLON from '@babylonjs/core'
-
-interface LightConfig {
-    hemispheric: {
-        name: string
-        direction: BABYLON.Vector3
-    }
-    directional: {
-        name: string
-        direction: BABYLON.Vector3
-    }
-}
-
-const LIGHT_CONFIG: LightConfig = {
-    hemispheric: {
-        name: 'hemisphericLight',
-        direction: new BABYLON.Vector3(0, 1, 0)
-    },
-    directional: {
-        name: 'directionalLight',
-        direction: new BABYLON.Vector3(-1, -2, -1)
-    }
-} as const
+import { LIGHT_CONFIG } from '../types'
 
 /**
  * シーンのライティングをセットアップします

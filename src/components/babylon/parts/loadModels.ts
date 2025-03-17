@@ -1,48 +1,8 @@
 import * as BABYLON from '@babylonjs/core'
 import '@babylonjs/loaders'
 import * as BABYLONMMD from 'babylon-mmd'
-
-interface ModelConfig {
-    path: string
-    scale: BABYLON.Vector3
-    position: BABYLON.Vector3
-    rotation: BABYLON.Vector3
-}
-
-interface SceneModels {
-    stairMesh?: BABYLON.AbstractMesh
-    elevatorMesh?: BABYLON.AbstractMesh
-}
-
-interface MMDCharacter {
-    name: string
-    modelPath: string
-    position: BABYLON.Vector3
-}
-
-const MODEL_CONFIG = {
-    stairs: {
-        path: '/models/stairs.glb',
-        scale: new BABYLON.Vector3(2, 1.5, 2),
-        position: new BABYLON.Vector3(-2.34, 0, 6.25),
-        rotation: new BABYLON.Vector3(0, 0, 0)
-    },
-    elevator: {
-        path: '/models/elevter.glb',
-        scale: new BABYLON.Vector3(2, 1.5, 1.5),
-        position: new BABYLON.Vector3(-4.9, 0, -5),
-        rotation: new BABYLON.Vector3(0, 0, 0)
-    }
-}
-
-const MMD_CHARACTERS: { [key: number]: MMDCharacter } = {
-    1: { name: 'yoyo', modelPath: '/models/yoyo/yoyo.pmx', position: new BABYLON.Vector3(0, 0, 3) },
-    2: { name: 'cure', modelPath: '/models/cure/cure.pmx', position: new BABYLON.Vector3(0, 0, 3) },
-    3: { name: 'dhiona', modelPath: '/models/dhiona/dhiona.pmx', position: new BABYLON.Vector3(0, 0, 3) },
-    4: { name: 'nana', modelPath: '/models/nana/nana.pmx', position: new BABYLON.Vector3(0, 0, 3) }
-}
-
-const MMD_SCALE = new BABYLON.Vector3(0.2, 0.2, 0.2)
+import type { SceneModels, ModelConfig, MMDCharacter } from '../types'
+import { MODEL_CONFIG, MMD_CHARACTERS, MMD_SCALE } from '../types'
 
 /**
  * モデルを読み込み、シーンに配置します
@@ -101,6 +61,7 @@ async function loadStructuralModels(
 async function loadModel(
     scene: BABYLON.Scene,
     config: ModelConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     name: string
 ): Promise<BABYLON.AbstractMesh> {
     const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', config.path, scene)

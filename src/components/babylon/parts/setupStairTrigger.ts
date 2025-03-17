@@ -1,23 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
 import { animateCameraUpStairs } from './animateCameraUpStairs'
-
-interface TriggerConfig {
-    position: BABYLON.Vector3
-    range: number
-}
-
-interface AnimationState {
-    value: boolean
-}
-
-interface SceneModels {
-    stairMesh?: BABYLON.AbstractMesh
-}
-
-const STAIR_TRIGGER_CONFIG: TriggerConfig = {
-    position: new BABYLON.Vector3(3, 1, 9),
-    range: 2
-} as const
+import type { SceneModels, AnimationState } from '../types'
+import { STAIR_TRIGGER_CONFIG } from '../types'
 
 /**
  * 階段のトリガーをセットアップします
