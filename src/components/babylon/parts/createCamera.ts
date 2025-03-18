@@ -95,10 +95,10 @@ function setupViewLimits(
     camera.onAfterCheckInputsObservable.add(() => {
         const rotation = camera.rotation
         if (limits.minBeta !== undefined && limits.maxBeta !== undefined) {
-            rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
+            // rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
         }
         if (limits.minAlpha !== undefined && limits.maxAlpha !== undefined) {
-            rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
+            // rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
         }
         camera.rotation = rotation
     })
