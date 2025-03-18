@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useCareerStore } from '@/stores/career'
-import { useLanguageStore } from '@/stores/language'
-import type { CareerCategory } from '@/stores/career'
+import { useCareerStore } from '../../../stores/career'
+import { useLanguageStore } from '../../../stores/language'
+import type { CareerCategory } from '../../../stores/career'
 import CareerTimelineItem from '../parts/CareerTimelineItem.vue'
 import { computed, ref } from 'vue'
 

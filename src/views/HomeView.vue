@@ -20,13 +20,16 @@ const languageStore = useLanguageStore()
 
 // マウス位置トラッキング用の状態
 const mousePos = reactive({ x: 0, y: 0 })
-const updateMousePos = (e) => {
+const updateMousePos = (e: MouseEvent) => {
   mousePos.x = e.clientX
   mousePos.y = e.clientY
 }
 
 // セクションのアニメーション状態
-const animatedSections = reactive({})
+interface AnimatedSections {
+  [key: string]: boolean;
+}
+const animatedSections = reactive<AnimatedSections>({})
 
 // セクション定義
 const sections = [
@@ -40,12 +43,12 @@ const sections = [
 ]
 
 // 翻訳されたセクションタイトルを取得する関数
-const getSectionTitle = (sectionId) => {
+const getSectionTitle = (sectionId: string) => {
   return languageStore.t('navigation', sectionId)
 }
 
 // Intersection Observerのコールバック
-const observerCallback = (entries) => {
+const observerCallback = (entries: IntersectionObserverEntry[]) => {
   entries.forEach(entry => {
     const sectionId = entry.target.getAttribute('data-section-id')
     if (sectionId) {
@@ -99,7 +102,7 @@ onUnmounted(() => {
     <v-main class="pt-0">
         <!-- About セクション（特別扱い） -->
         <section
-            :ref="el => store.registerSectionRef('about', el)"
+            :ref="el => store.registerSectionRef('about', el as HTMLElement)"
             class="section-container"
             id="about"
             data-section-id="about"
@@ -112,7 +115,7 @@ onUnmounted(() => {
         <template v-for="section in sections.slice(1)" :key="section.id">
             <section 
                 v-if="section.component" 
-                :ref="el => store.registerSectionRef(section.id, el)" 
+                :ref="el => store.registerSectionRef(section.id, el as HTMLElement)" 
                 class="section-container"
                 :id="section.id"
                 :data-section-id="section.id"

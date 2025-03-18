@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
-import type { Skill } from '@/stores/skill'
-import { useLanguageStore } from '@/stores/language'
+import type { Skill } from '../../../stores/skill'
+import { useLanguageStore } from '../../../stores/language'
 
 // プロップスの型定義
 const props = defineProps<{

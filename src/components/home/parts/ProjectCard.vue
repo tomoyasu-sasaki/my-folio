@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Project } from '@/stores/project'
-import { useLanguageStore } from '@/stores/language'
+import type { Project } from '../../../stores/project'
+import { useLanguageStore } from '../../../stores/language'
 
 defineProps<{
     project: Project

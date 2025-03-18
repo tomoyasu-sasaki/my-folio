@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CareerItem } from '@/stores/career'
-import { useLanguageStore } from '@/stores/language'
+import type { CareerItem } from '../../../stores/career'
+import { useLanguageStore } from '../../../stores/language'
 
 // propsを直接分解して使用
 const { item } = defineProps<{

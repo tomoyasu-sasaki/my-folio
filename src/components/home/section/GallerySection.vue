@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useGalleryStore } from '@/stores/gallery'
-import { useLanguageStore } from '@/stores/language'
+import { useGalleryStore } from '../../../stores/gallery'
+import { useLanguageStore } from '../../../stores/language'
 import GalleryCard from '../parts/GalleryCard.vue'
 import { computed, ref } from 'vue'
 
