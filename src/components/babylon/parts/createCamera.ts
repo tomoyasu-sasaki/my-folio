@@ -1,7 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
-import type { CameraOptions, CameraControls, ViewLimits, ObstacleAvoidanceOptions, CameraState } from '../types'
-import { DEFAULT_OPTIONS } from '../types'
-
+import type { CameraOptions, CameraControls, ViewLimits, ObstacleAvoidanceOptions, CameraState } from '../types/index'
+import { DEFAULT_OPTIONS } from '../types/index'
 /**
  * 3D空間内にカメラを作成し、移動制限を設定します
  * @param scene - Babylonのシーンオブジェクト
@@ -93,16 +92,16 @@ function setupViewLimits(
 ): void {
     if (!limits) return
 
-    // camera.onAfterCheckInputsObservable.add(() => {
-    //     const rotation = camera.rotation
-    //     if (limits.minBeta !== undefined && limits.maxBeta !== undefined) {
-    //         rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
-    //     }
-    //     if (limits.minAlpha !== undefined && limits.maxAlpha !== undefined) {
-    //         rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
-    //     }
-    //     camera.rotation = rotation
-    // })
+    camera.onAfterCheckInputsObservable.add(() => {
+        const rotation = camera.rotation
+        if (limits.minBeta !== undefined && limits.maxBeta !== undefined) {
+            rotation.x = Math.max(limits.minBeta, Math.min(limits.maxBeta, rotation.x))
+        }
+        if (limits.minAlpha !== undefined && limits.maxAlpha !== undefined) {
+            rotation.y = Math.max(limits.minAlpha, Math.min(limits.maxAlpha, rotation.y))
+        }
+        camera.rotation = rotation
+    })
 }
 
 /**

@@ -1,6 +1,5 @@
 import * as BABYLON from '@babylonjs/core'
-import { LIGHT_CONFIG } from '../types'
-
+import { LIGHT_CONFIG } from '../types/index'
 /**
  * シーンのライティングをセットアップします
  * @param scene - 設定対象のシーン

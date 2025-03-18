@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
 import { animateCameraUpStairs } from './animateCameraUpStairs'
-import type { SceneModels, AnimationState } from '../types'
-import { STAIR_TRIGGER_CONFIG } from '../types'
+import type { SceneModels, AnimationState } from '../types/index'
+import { STAIR_TRIGGER_CONFIG } from '../types/index'
 
 /**
  * 階段のトリガーをセットアップします

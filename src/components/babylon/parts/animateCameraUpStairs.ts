@@ -1,64 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
-import type { AnimationConfig, AnimationState } from '../types'
-
-interface PositionStep {
-    deltaX: number
-    deltaY: number
-    deltaZ: number
-}
-
-interface RotationStep {
-    deltaY: number
-}
-
-const ANIMATION_CONFIG: AnimationConfig = {
-    position: {
-        name: 'cameraPositionAnimation',
-        property: 'position',
-        frameRate: 20,
-        type: BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-        loopMode: BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
-        frames: [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100],
-        startPosition: new BABYLON.Vector3(3, 1.6, 8),
-        steps: [
-            { deltaX: -1.5, deltaY: 2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: -0.5, deltaY: 0.2, deltaZ: 0 },
-            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
-            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
-            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
-            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
-            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
-            { deltaX: 0, deltaY: 0, deltaZ: 0 }
-        ]
-    },
-    rotation: {
-        name: 'cameraRotationAnimation',
-        property: 'rotation',
-        frameRate: 30,
-        type: BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-        loopMode: BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
-        frames: [0, 30, 40, 50, 60, 70, 100],
-        startRotation: {
-            x: -5,
-            y: -40
-        },
-        steps: [
-            { deltaY: -30 }, // -70度へ
-            { deltaY: -20 }, // -90度へ
-            { deltaY: -30 }, // -120度へ
-            { deltaY: -30 }, // -150度へ
-            { deltaY: -30 }, // -180度へ
-            { deltaY: 0 }    // そのまま
-        ]
-    }
-} as const
-
+import { ANIMATION_CONFIG } from '../types/index'
+import type { AnimationState } from '../types/index'
 /**
  * カメラの階段上昇アニメーションを設定します
  */
@@ -120,7 +62,7 @@ function createPositionAnimation(): BABYLON.Animation {
  */
 function createPositionKeys(): { frame: number; value: BABYLON.Vector3 }[] {
     const positions = calculatePositions()
-    return ANIMATION_CONFIG.position.frames.map((frame: number, index: number) => ({
+    return ANIMATION_CONFIG.position.frames.map((frame, index) => ({
         frame,
         value: positions[index]
     }))
@@ -133,7 +75,7 @@ function calculatePositions(): BABYLON.Vector3[] {
     const positions = [ANIMATION_CONFIG.position.startPosition.clone()]
     let currentPosition = ANIMATION_CONFIG.position.startPosition.clone()
 
-    ANIMATION_CONFIG.position.steps.forEach((step: PositionStep) => {
+    ANIMATION_CONFIG.position.steps.forEach(step => {
         currentPosition = currentPosition.add(
             new BABYLON.Vector3(step.deltaX, step.deltaY, step.deltaZ)
         )
@@ -165,7 +107,7 @@ function createRotationAnimation(camera: BABYLON.UniversalCamera): BABYLON.Anima
  */
 function createRotationKeys(camera: BABYLON.UniversalCamera): { frame: number; value: BABYLON.Vector3 }[] {
     const rotations = calculateRotations(camera)
-    return ANIMATION_CONFIG.rotation.frames.map((frame: number, index: number) => ({
+    return ANIMATION_CONFIG.rotation.frames.map((frame, index) => ({
         frame,
         value: rotations[index]
     }))
@@ -183,10 +125,10 @@ function calculateRotations(camera: BABYLON.UniversalCamera): BABYLON.Vector3[] 
     const rotations = [startRotation.clone()]
     let currentRotation = startRotation.clone()
 
-    ANIMATION_CONFIG.rotation.steps.forEach((step: RotationStep) => {
+    ANIMATION_CONFIG.rotation.steps.forEach(step => {
         currentRotation = new BABYLON.Vector3(
             currentRotation.x,
-            currentRotation.y + step.deltaY,
+            currentRotation.y + BABYLON.Tools.ToRadians(step.deltaY),
             currentRotation.z
         )
         rotations.push(currentRotation.clone())

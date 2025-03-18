@@ -48,105 +48,105 @@ export const useGalleryStore = defineStore({
             items: [
                 createGalleryItem(
                     '1',
-                    '/img/Gallery/GalleryCollection1.png',
+                    '/my-folio/img/Gallery/GalleryCollection1.png',
                     ['アート', 'AI生成'],
                     '2024-01',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '2',
-                    '/img/Gallery/GalleryCollection2.png',
+                    '/my-folio/img/Gallery/GalleryCollection2.png',
                     ['アート', 'AI生成'],
                     '2024-01',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '3',
-                    '/img/Gallery/GalleryCollection3.png',
+                    '/my-folio/img/Gallery/GalleryCollection3.png',
                     ['アート', 'AI生成'],
                     '2024-01',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '4',
-                    '/img/Gallery/GalleryCollection4.png',
+                    '/my-folio/img/Gallery/GalleryCollection4.png',
                     ['アート', 'AI生成'],
                     '2024-01',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '5',
-                    '/img/Gallery/GalleryCollection5.png',
+                    '/my-folio/img/Gallery/GalleryCollection5.png',
                     ['アート', 'AI生成'],
                     '2024-01',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '6',
-                    '/img/Gallery/GalleryCollection6.png',
+                    '/my-folio/img/Gallery/GalleryCollection6.png',
                     ['アート', 'AI生成'],
                     '2024-02',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '7',
-                    '/img/Gallery/GalleryCollection7.png',
+                    '/my-folio/img/Gallery/GalleryCollection7.png',
                     ['アート', 'AI生成'],
                     '2024-02',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '8',
-                    '/img/Gallery/GalleryCollection8.png',
+                    '/my-folio/img/Gallery/GalleryCollection8.png',
                     ['アート', 'AI生成'],
                     '2024-02',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '9',
-                    '/img/Gallery/GalleryCollection9.png',
+                    '/my-folio/img/Gallery/GalleryCollection9.png',
                     ['アート', 'AI生成'],
                     '2024-02',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '10',
-                    '/img/Gallery/GalleryCollection10.png',
+                    '/my-folio/img/Gallery/GalleryCollection10.png',
                     ['アート', 'AI生成'],
                     '2024-02',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '11',
-                    '/img/Gallery/GalleryCollection11.png',
+                    '/my-folio/img/Gallery/GalleryCollection11.png',
                     ['アート', 'AI生成'],
                     '2024-03',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '12',
-                    '/img/Gallery/GalleryCollection12.png',
+                    '/my-folio/img/Gallery/GalleryCollection12.png',
                     ['アート', 'AI生成'],
                     '2024-03',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '13',
-                    '/img/Gallery/GalleryCollection13.png',
+                    '/my-folio/img/Gallery/GalleryCollection13.png',
                     ['アート', 'AI生成'],
                     '2024-03',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '14',
-                    '/img/Gallery/GalleryCollection14.png',
+                    '/my-folio/img/Gallery/GalleryCollection14.png',
                     ['アート', 'AI生成'],
                     '2024-03',
                     'DALL-E2'
                 ),
                 createGalleryItem(
                     '15',
-                    '/img/Gallery/GalleryCollection15.png',
+                    '/my-folio/img/Gallery/GalleryCollection15.png',
                     ['アート', 'AI生成'],
                     '2024-03',
                     'DALL-E2'
