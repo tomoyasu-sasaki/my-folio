@@ -1,7 +1,7 @@
 // createMaterials.ts
 import * as BABYLON from '@babylonjs/core'
-import type { Materials, TextureConfig } from '../types'
-import { MATERIALS_CONFIG } from '../types'
+import type { Materials, TextureConfig } from '../types/index'
+import { MATERIALS_CONFIG } from '../types/index'
 /**
  * シーンのマテリアルを作成します
  * @param scene - Babylonのシーンオブジェクト

@@ -1,8 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
 import * as GUI from '@babylonjs/gui'
-import type { ElevatorUIComponents, FloorInfo } from '../types'
-import { FLOOR_INFO, UI_SETTINGS } from '../types'
-
+import type { FloorInfo, ElevatorUIComponents } from '../types/index'
+import { FLOOR_INFO, UI_SETTINGS } from '../types/index'
 /**
  * エレベーターUIをセットアップします
  */

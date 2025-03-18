@@ -1,7 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
-import type { Materials } from '../types'
-import type { FloorConfig, WallOptions } from '../types'
-import { FLOOR_CONFIG } from '../types'
+import type { Materials, FloorConfig, WallOptions } from '../types/index'
+import { FLOOR_CONFIG } from '../types/index'
 
 /**
  * 地面と壁を作成します

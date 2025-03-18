@@ -26,7 +26,7 @@ function openOtherService(url: string) {
 <template>
     <v-card class="project-card" variant="outlined" elevation="2">
         <v-img
-            :src="`/img/Project/${project.image}`"
+            :src="`/my-folio/img/Project/${project.image}`"
             height="200"
             width="200"
             cover

@@ -2,13 +2,12 @@ import * as BABYLON from '@babylonjs/core'
 import * as GUI from '@babylonjs/gui'
 
 /** アニメーションの状態を管理するインターフェース */
+
 export interface AnimationState {
     value: boolean
 }
 
-/** アニメーションの設定を定義するインターフェース */
 export interface AnimationConfig {
-    /** 位置アニメーションの設定 */
     position: {
         name: string
         property: string
@@ -23,7 +22,6 @@ export interface AnimationConfig {
             deltaZ: number
         }>
     }
-    /** 回転アニメーションの設定 */
     rotation: {
         name: string
         property: string
@@ -40,6 +38,55 @@ export interface AnimationConfig {
         }>
     }
 }
+
+export const ANIMATION_CONFIG: AnimationConfig = {
+    position: {
+        name: 'cameraPositionAnimation',
+        property: 'position',
+        frameRate: 20,
+        type: BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+        loopMode: BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+        frames: [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100],
+        startPosition: new BABYLON.Vector3(3, 1.6, 8),
+        steps: [
+            { deltaX: -1.5, deltaY: 2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -1.2, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: -0.5, deltaY: 0.2, deltaZ: 0 },
+            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
+            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
+            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
+            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
+            { deltaX: 0, deltaY: 0.5, deltaZ: -1 },
+            { deltaX: 0, deltaY: 0, deltaZ: 0 }
+        ]
+    },
+    rotation: {
+        name: 'cameraRotationAnimation',
+        property: 'rotation',
+        frameRate: 30,
+        type: BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+        loopMode: BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+        frames: [0, 30, 40, 50, 60, 70, 100],
+        startRotation: {
+            x: -5,
+            y: -40
+        },
+        steps: [
+            { deltaY: -30 }, // -70度へ
+            { deltaY: -20 }, // -90度へ
+            { deltaY: -30 }, // -120度へ
+            { deltaY: -30 }, // -150度へ
+            { deltaY: -30 }, // -180度へ
+            { deltaY: 0 }    // そのまま
+        ]
+    }
+} as const
+
 
 /** シーンの基本設定を定義するインターフェース */
 export interface SceneConfig {

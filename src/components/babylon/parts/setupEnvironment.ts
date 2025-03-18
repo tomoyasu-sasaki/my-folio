@@ -1,6 +1,6 @@
 // setupEnvironment.ts
 import * as BABYLON from '@babylonjs/core'
-import { ENVIRONMENT_CONFIG } from '../types'
+import { ENVIRONMENT_CONFIG } from '../types/index'
 
 /**
  * シーンの環境設定を行います

@@ -7,14 +7,18 @@ import { createCamera } from './createCamera'
 import { setupLights } from './setupLights'
 import { setupEnvironment } from './setupEnvironment'
 import { createMaterials } from './createMaterials'
-import type { Materials } from '../types'
+import type { Materials } from '../types/index'
 import { createGroundAndWalls } from './createGroundAndWalls'
 import { loadModels } from './loadModels'
 import { setupElevatorUI } from './setupElevatorUI'
 import { setupFloorUI } from './setupFloorUI'
 import { setupStairTrigger } from './setupStairTrigger'
-// import { animateCameraUpStairs } from './animateCameraUpStairs'
-import type { SceneConfig, SceneModels, WallOptions } from '../types'
+import type { SceneConfig, WallOptions } from '../types/index'
+
+interface SceneModels {
+    stairMesh?: BABYLON.AbstractMesh
+    elevatorMesh?: BABYLON.AbstractMesh
+}
 
 export class BuildingScene {
     private readonly canvas: HTMLCanvasElement

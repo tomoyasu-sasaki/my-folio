@@ -1,8 +1,7 @@
 import * as BABYLON from '@babylonjs/core'
 import * as GUI from '@babylonjs/gui'
-import type { BoardConfig, CareerItem, SkillItem } from '../types'
-import { UI_CONFIG, CAREER_DATA, SKILLS_DATA } from '../types'
-
+import type { BoardConfig, CareerItem, SkillItem } from '../types/index'
+import { CAREER_DATA, SKILLS_DATA, UI_CONFIG } from '../types/index'
 /**
  * フロアUIをセットアップします
  */
@@ -172,8 +171,8 @@ function createProfileStack(): GUI.StackPanel {
     stack.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
     stack.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
     stack.paddingTop = '20px'
-    stack.width = '90%'
-    stack.height = '100%'
+    stack.width = '500px'
+    stack.height = '500px'
     return stack
 }
 
@@ -182,7 +181,7 @@ function createProfileStack(): GUI.StackPanel {
  */
 function addProfileContent(stack: GUI.StackPanel): void {
     // プロフィール画像
-    const image = new GUI.Image('profileImage', '/logo2.svg')
+    const image = new GUI.Image('profileImage', '/my-folio/logo2.svg')
     Object.assign(image, UI_CONFIG.profile.image)
     stack.addControl(image)
 
@@ -241,8 +240,8 @@ function createTimelineStack(): GUI.StackPanel {
     const stack = new GUI.StackPanel()
     stack.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
     stack.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
-    stack.width = '90%'
-    stack.height = '100%'
+    stack.width = '500px'
+    stack.height = '500px'
     stack.paddingTop = '20px'
     return stack
 }
@@ -260,7 +259,7 @@ function addTimelineContent(stack: GUI.StackPanel): void {
     stack.addControl(title)
 
     // タイムラインアイテム
-    CAREER_DATA.forEach((item: CareerItem) => {
+    CAREER_DATA.forEach(item => {
         const itemStack = createTimelineItem(item)
         stack.addControl(itemStack)
     })
@@ -272,7 +271,7 @@ function addTimelineContent(stack: GUI.StackPanel): void {
 function createTimelineItem(item: CareerItem): GUI.StackPanel {
     const itemStack = new GUI.StackPanel()
     itemStack.isVertical = false
-    itemStack.width = '100%'
+    itemStack.width = '200px'
     Object.assign(itemStack, UI_CONFIG.timeline.item)
 
     // ドット
@@ -330,8 +329,8 @@ function setupSkillsBoard(scene: BABYLON.Scene): void {
  */
 function createSkillStack(): GUI.StackPanel {
     const stack = new GUI.StackPanel()
-    stack.width = '90%'
-    stack.height = '100%'
+    stack.width = '500px'
+    stack.height = '500px'
     stack.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
     stack.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
     stack.paddingTop = '20px'
@@ -342,7 +341,7 @@ function createSkillStack(): GUI.StackPanel {
  * スキルの内容を追加します
  */
 function addSkillContent(stack: GUI.StackPanel): void {
-    SKILLS_DATA.forEach((skill: SkillItem) => {
+    SKILLS_DATA.forEach(skill => {
         const skillName = new GUI.TextBlock()
         skillName.text = skill.name
         skillName.height = '40px'
@@ -363,7 +362,7 @@ function createSkillGraphPanel(skill: SkillItem): GUI.StackPanel {
     const panel = new GUI.StackPanel()
     panel.isVertical = false
     panel.height = '100px'
-    panel.width = '100%'
+    panel.width = '500px'
     panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
 
     // 経験値バーとテキスト
@@ -394,7 +393,7 @@ function addSkillBar(panel: GUI.StackPanel, value: number, color: string): void 
  */
 function addSkillText(panel: GUI.StackPanel, value: number): void {
     const text = new GUI.TextBlock()
-    text.text = `${value}%`
+    text.text = `${value}px`
     Object.assign(text, UI_CONFIG.skill.text)
     text.color = 'black'
     text.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
