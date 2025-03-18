@@ -7,162 +7,125 @@ import { createCamera } from './createCamera'
 import { setupLights } from './setupLights'
 import { setupEnvironment } from './setupEnvironment'
 import { createMaterials } from './createMaterials'
-import type { Materials } from '../types'
+import type { Materials } from './createMaterials'
 import { createGroundAndWalls } from './createGroundAndWalls'
 import { loadModels } from './loadModels'
 import { setupElevatorUI } from './setupElevatorUI'
 import { setupFloorUI } from './setupFloorUI'
 import { setupStairTrigger } from './setupStairTrigger'
 // import { animateCameraUpStairs } from './animateCameraUpStairs'
-import type { SceneConfig, SceneModels, WallOptions } from '../types'
 
 export class BuildingScene {
-    private readonly canvas: HTMLCanvasElement
-    private readonly engine: BABYLON.Engine
-    private readonly config: SceneConfig = {
-        wallHeight: 10,
-        maxFloor: 5,
-        cameraHeight: 1.6
-    }
-    private readonly wallOptions: WallOptions
-    private readonly models: SceneModels = {}
-
+    private canvas: HTMLCanvasElement
+    private engine: BABYLON.Engine
     private scene!: BABYLON.Scene
     private camera!: BABYLON.UniversalCamera
-    private cameraPosition: BABYLON.Vector3 = new BABYLON.Vector3()
-    private cameraRotation: BABYLON.Vector3 = new BABYLON.Vector3()
+    private cameraPosition: BABYLON.Vector3
+    private cameraRotation: BABYLON.Vector3
+    private wallHeight: number = 10
     private isCameraAnimating: boolean = false
-    private isDisposed: boolean = false
+    private wallOptions = {
+        width: 10,
+        height: this.wallHeight,
+        sideOrientation: BABYLON.Mesh.DOUBLESIDE
+    }
+    private models: {
+        stairMesh?: BABYLON.AbstractMesh
+        elevatorMesh?: BABYLON.AbstractMesh
+    } = {}
+    private elevatorUIVisible: boolean = false
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.engine = new BABYLON.Engine(this.canvas, true, {
-            preserveDrawingBuffer: true,
-            stencil: true
-        })
-
-        this.wallOptions = {
-            width: 10,
-            height: this.config.wallHeight,
-            sideOrientation: BABYLON.Mesh.DOUBLESIDE
-        }
-
-        this.initializeScene()
-        this.setupEventListeners()
-    }
-
-    private initializeScene(): void {
-        this.cameraPosition = new BABYLON.Vector3(0, this.config.cameraHeight, -8)
+        this.engine = new BABYLON.Engine(this.canvas, true)
+        this.cameraPosition = new BABYLON.Vector3(0, 1.6, -8)
         this.cameraRotation = new BABYLON.Vector3(0, 0, 0)
+
         this.createFloorScene(1)
-        this.startRenderLoop()
-    }
 
-    private setupEventListeners(): void {
-        window.addEventListener('resize', this.handleResize)
-    }
-
-    private handleResize = (): void => {
-        if (!this.isDisposed) {
-            this.engine.resize()
-        }
-    }
-
-    private startRenderLoop(): void {
+        // レンダリングループ
         this.engine.runRenderLoop(() => {
-            if (this.scene?.activeCamera && !this.isDisposed) {
+            if (this.scene && this.scene.activeCamera) {
                 this.scene.render()
             }
+        })
+
+        // ウィンドウリサイズ時の処理
+        window.addEventListener('resize', () => {
+            this.engine.resize()
         })
     }
 
     private createFloorScene(floor: number): void {
-        this.disposeCurrentScene()
-        this.setupNewScene()
-        this.setupSceneElements(floor)
-        this.setupInteractions(floor)
-    }
-
-    private disposeCurrentScene(): void {
+        // シーンの初期化
         if (this.scene) {
             this.scene.dispose()
         }
-    }
-
-    private setupNewScene(): void {
         this.scene = new BABYLON.Scene(this.engine)
+
+        // カメラの作成
         this.camera = createCamera(
             this.scene,
             this.cameraPosition,
             this.cameraRotation,
             this.canvas
         )
-        this.scene.activeCamera = this.camera
-    }
 
-    private setupSceneElements(floor: number): void {
+        // シーンのアクティブなカメラを設定
+        this.scene.activeCamera = this.camera
+
+        // ライトと環境の設定
         setupLights(this.scene)
         setupEnvironment(this.scene)
 
+        // マテリアルの作成
         const materials: Materials = createMaterials(this.scene)
-        createGroundAndWalls(
-            this.scene,
-            materials,
-            floor,
-            this.config.wallHeight,
-            this.wallOptions
-        )
 
+        // 地面と壁の作成
+        createGroundAndWalls(this.scene, materials, floor, this.wallHeight, this.wallOptions)
+
+        // モデルの読み込み
         loadModels(this.scene, floor, this.models)
+
+        // 各階のUI設定
         setupFloorUI(this.scene, floor)
-    }
 
-    private setupInteractions(floor: number): void {
-        this.setupElevatorInteraction(floor)
-        this.setupStairInteraction(floor)
-    }
-
-    private setupElevatorInteraction(floor: number): void {
-        setupElevatorUI(
-            this.scene,
-            floor,
-            this.camera,
-            this.models,
-            this.moveToFloor.bind(this)
+        // エレベーターのUI設定
+        setupElevatorUI(this.scene, floor, this.camera, this.models, (nextFloor: number) =>
+            this.moveToFloor(nextFloor)
         )
-    }
 
-    private setupStairInteraction(floor: number): void {
-        if (floor < this.config.maxFloor) {
+        // 階段のトリガー設定（最上階でない場合）
+        if (floor < 5) {
             setupStairTrigger(
                 this.scene,
                 floor,
                 this.camera,
                 this.models,
                 { value: this.isCameraAnimating },
-                this.moveToFloor.bind(this),
+                (nextFloor: number) => this.moveToFloor(nextFloor),
                 (value: boolean) => (this.isCameraAnimating = value)
             )
         }
     }
 
     private moveToFloor(floor: number): void {
-        this.updateCameraState()
-        this.engine.stopRenderLoop()
-        this.createFloorScene(floor)
-        this.startRenderLoop()
-    }
-
-    private updateCameraState(): void {
         this.cameraPosition = this.camera.position.clone()
-        this.cameraPosition.y = this.config.cameraHeight
+        this.cameraPosition.y = 1.6
         this.cameraRotation = this.camera.rotation.clone()
-    }
 
-    public dispose(): void {
-        this.isDisposed = true
-        window.removeEventListener('resize', this.handleResize)
-        this.scene?.dispose()
-        this.engine.dispose()
+        // レンダリングループを停止
+        this.engine.stopRenderLoop()
+
+        // 現在のシーンを破棄
+        this.scene.dispose()
+
+        this.createFloorScene(floor)
+
+        this.engine.runRenderLoop(() => {
+            if (this.scene && this.scene.activeCamera) {
+                this.scene.render()
+            }
+        })
     }
 }

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { useGalleryStore } from '@/stores/gallery'
-import { useLanguageStore } from '@/stores/language'
 import GalleryCard from '../parts/GalleryCard.vue'
 import { computed, ref } from 'vue'
 
 const galleryStore = useGalleryStore()
-const languageStore = useLanguageStore()
 const items = computed(() => galleryStore.getAllItems)
 
 // 表示モード
@@ -39,7 +37,7 @@ const filteredItems = computed(() => {
                         :color="!selectedMonth ? 'primary' : undefined"
                         @click="selectedMonth = null"
                     >
-                        {{ languageStore.t('gallery', 'all') }}
+                        すべて
                     </v-chip>
                     <v-chip
                         v-for="month in uniqueMonths"

@@ -1,26 +1,13 @@
 <script setup lang="ts">
 import type { CareerItem } from '@/stores/career'
-import { useLanguageStore } from '@/stores/language'
 
-// propsを直接分解して使用
-const { item } = defineProps<{
+defineProps<{
     item: CareerItem
 }>()
 
-const languageStore = useLanguageStore()
-
 const formatDate = (date: string) => {
     const [year, month] = date.split('/')
-    const lang = languageStore.currentLanguage
-    
-    if (lang === 'ja') {
-        return `${year}${languageStore.t('career', 'date', 'year')}${month}${languageStore.t('career', 'date', 'month')}`
-    } else {
-        // 英語の場合は "Month Year" 形式
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        const monthIndex = parseInt(month) - 1
-        return `${monthNames[monthIndex]} ${year}`
-    }
+    return `${year}年${month}月`
 }
 </script>
 
@@ -41,12 +28,10 @@ const formatDate = (date: string) => {
         </template>
 
         <v-card class="career-card" variant="outlined" :color="item.color">
-            <v-card-item>
-                <v-card-title class="text-h6 card-title">{{ item.title }}</v-card-title>
-                <v-card-text>
-                    <p class="mb-0 description-text">{{ item.description }}</p>
-                </v-card-text>
-            </v-card-item>
+            <v-card-title class="text-h6 card-title">{{ item.title }}</v-card-title>
+            <v-card-text>
+                <p class="mb-0 description-text">{{ item.description }}</p>
+            </v-card-text>
         </v-card>
     </v-timeline-item>
 </template>
@@ -58,6 +43,7 @@ const formatDate = (date: string) => {
 
 .date-section {
     min-width: 130px;
+    padding-right: 16px;
 }
 
 .career-card {
@@ -74,6 +60,7 @@ const formatDate = (date: string) => {
 @media (max-width: 600px) {
     .date-section {
         min-width: 90px;
+        padding-right: 8px;
     }
 
     .date-text {
@@ -98,12 +85,16 @@ const formatDate = (date: string) => {
         word-break: break-word;
         white-space: pre-wrap;
     }
+
+    .career-card {
+        margin-left: -10px;
+        max-width: calc(100vw - 140px);
+    }
 }
 
 @media (max-width: 400px) {
     .date-section {
         min-width: 70px;
-        margin-left: -12px;
     }
 
     .date-text {
@@ -114,5 +105,8 @@ const formatDate = (date: string) => {
         font-size: 0.75rem !important;
     }
 
+    .career-card {
+        max-width: calc(100vw - 120px);
+    }
 }
 </style> 

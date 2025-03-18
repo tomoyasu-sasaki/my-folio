@@ -1,11 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
 import * as GUI from '@babylonjs/gui'
-import type { ElevatorUIComponents, FloorInfo } from '../types'
-import { FLOOR_INFO, UI_SETTINGS } from '../types'
 
-/**
- * エレベーターUIをセットアップします
- */
 export function setupElevatorUI(
     scene: BABYLON.Scene,
     floor: number,
@@ -13,132 +8,72 @@ export function setupElevatorUI(
     models: { elevatorMesh?: BABYLON.AbstractMesh },
     moveToFloor: (floor: number) => void
 ): void {
-    if (!scene || !camera) {
-        throw new Error('必要なコンポーネントが提供されていません')
-    }
+    const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ElevatorUI')
 
-    const advancedTexture = createFullscreenUI()
-    const uiComponents = createElevatorUIComponents(floor, moveToFloor)
-    advancedTexture.addControl(uiComponents.panel)
+    // エレベーター前のUI
+    let elevatorUIVisible = false
+    const floorSelectionPanel = new GUI.StackPanel()
+    floorSelectionPanel.width = '220px'
+    floorSelectionPanel.isVertical = true
+    floorSelectionPanel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
+    floorSelectionPanel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
+    floorSelectionPanel.isVisible = false
+    advancedTexture.addControl(floorSelectionPanel)
 
-    setupInteractionHandling(scene, camera, models, uiComponents.panel)
-}
+    const floorLabel = new GUI.TextBlock()
+    floorLabel.text = '何階へ行きますか？'
+    floorLabel.height = '40px'
+    floorLabel.color = 'white'
+    floorLabel.fontSize = 24
+    floorSelectionPanel.addControl(floorLabel)
 
-/**
- * フルスクリーンUIを作成します
- */
-function createFullscreenUI(): GUI.AdvancedDynamicTexture {
-    return GUI.AdvancedDynamicTexture.CreateFullscreenUI('ElevatorUI')
-}
+    let floors = [
+        { floor: 1, section: '1階（ロビー）' },
+        { floor: 2, section: '2階（自己紹介）' },
+        { floor: 3, section: '3階（プロジェクト）' },
+        { floor: 4, section: '4階（スキルセット）' },
+        { floor: 5, section: '5階（連絡先）' }
+    ]
 
-/**
- * エレベーターUIコンポーネントを作成します
- */
-function createElevatorUIComponents(
-    currentFloor: number,
-    moveToFloor: (floor: number) => void
-): ElevatorUIComponents {
-    const panel = createPanel()
-    const label = createLabel()
-    panel.addControl(label)
+    floors = floors.filter((f) => f.floor !== floor)
 
-    const availableFloors = FLOOR_INFO.filter(f => f.floor !== currentFloor)
-    const buttons = createFloorButtons(availableFloors, moveToFloor, panel)
-
-    return { panel, label, buttons }
-}
-
-/**
- * パネルを作成します
- */
-function createPanel(): GUI.StackPanel {
-    const panel = new GUI.StackPanel()
-    panel.width = UI_SETTINGS.panel.width
-    panel.isVertical = true
-    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
-    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
-    panel.isVisible = false
-    return panel
-}
-
-/**
- * ラベルを作成します
- */
-function createLabel(): GUI.TextBlock {
-    const label = new GUI.TextBlock()
-    label.text = UI_SETTINGS.label.text
-    label.height = UI_SETTINGS.label.height
-    label.color = UI_SETTINGS.label.color
-    label.fontSize = UI_SETTINGS.label.fontSize
-    return label
-}
-
-/**
- * フロアボタンを作成します
- */
-function createFloorButtons(
-    floors: FloorInfo[],
-    moveToFloor: (floor: number) => void,
-    panel: GUI.StackPanel
-): GUI.Button[] {
-    return floors.map(floorItem => {
+    floors.forEach((floorItem) => {
         const button = GUI.Button.CreateSimpleButton(
             `floorButton_${floorItem.section}`,
             floorItem.section
         )
-        
-        button.width = UI_SETTINGS.button.width
-        button.height = UI_SETTINGS.button.height
-        button.color = UI_SETTINGS.button.color
-        button.fontSize = UI_SETTINGS.button.fontSize
-        button.background = UI_SETTINGS.button.background
-
+        button.width = '400px'
+        button.height = '50px'
+        button.color = 'white'
+        button.fontSize = 24
+        button.background = 'gray'
         button.onPointerUpObservable.add(() => {
-            handleFloorSelection(floorItem, panel, moveToFloor)
+            alert(`${floorItem.section} へ移動します`)
+            floorSelectionPanel.isVisible = false
+            elevatorUIVisible = false
+            moveToFloor(floorItem.floor)
         })
-
-        panel.addControl(button)
-        return button
+        floorSelectionPanel.addControl(button)
     })
-}
 
-/**
- * フロア選択時の処理を行います
- */
-function handleFloorSelection(
-    floorItem: FloorInfo,
-    panel: GUI.StackPanel,
-    moveToFloor: (floor: number) => void
-): void {
-    alert(`${floorItem.section} へ移動します`)
-    panel.isVisible = false
-    moveToFloor(floorItem.floor)
-}
-
-/**
- * エレベーターとの距離に基づくUI表示制御を設定します
- */
-function setupInteractionHandling(
-    scene: BABYLON.Scene,
-    camera: BABYLON.UniversalCamera,
-    models: { elevatorMesh?: BABYLON.AbstractMesh },
-    panel: GUI.StackPanel
-): void {
-    let isUIVisible = false
-
+    // エレベーターUIの表示制御
     scene.registerBeforeRender(() => {
-        if (!models.elevatorMesh) return
-
-        const distanceToElevator = BABYLON.Vector3.Distance(
-            camera.position,
-            models.elevatorMesh.position
-        )
-
-        const shouldBeVisible = distanceToElevator < UI_SETTINGS.interaction.elevatorDistance
-
-        if (shouldBeVisible !== isUIVisible) {
-            panel.isVisible = shouldBeVisible
-            isUIVisible = shouldBeVisible
+        if (models.elevatorMesh) {
+            const distanceToElevator = BABYLON.Vector3.Distance(
+                camera.position,
+                models.elevatorMesh.position
+            )
+            if (distanceToElevator < 3) {
+                if (!elevatorUIVisible) {
+                    floorSelectionPanel.isVisible = true
+                    elevatorUIVisible = true
+                }
+            } else {
+                if (elevatorUIVisible) {
+                    floorSelectionPanel.isVisible = false
+                    elevatorUIVisible = false
+                }
+            }
         }
     })
 }

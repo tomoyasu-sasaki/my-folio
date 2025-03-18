@@ -2,10 +2,8 @@
 import SkillChart from '../parts/SkillChart.vue'
 import { useSkillStore } from '@/stores/skill'
 import type { SkillCategory } from '@/stores/skill'
-import { useLanguageStore } from '@/stores/language'
 
 const skillStore = useSkillStore()
-const languageStore = useLanguageStore()
 const categories: SkillCategory[] = ['frontend', 'backend', 'database', 'aws']
 </script>
 
@@ -20,7 +18,7 @@ const categories: SkillCategory[] = ['frontend', 'backend', 'database', 'aws']
                 class="skill-category"
             >
                 <SkillChart
-                    :title="languageStore.t('skill', 'categories', category)"
+                    :title="skillStore.getCategoryInfo(category)?.title || ''"
                     :skills="skillStore.getSkillsByCategory(category)"
                 />
             </v-col>

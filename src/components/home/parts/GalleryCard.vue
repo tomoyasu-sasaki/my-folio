@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { GalleryItem } from '@/stores/gallery'
-import { useLanguageStore } from '@/stores/language'
 import { ref } from 'vue'
 
 defineProps<{
@@ -9,7 +8,6 @@ defineProps<{
 }>()
 
 const dialog = ref(false)
-const languageStore = useLanguageStore()
 
 const aiModelColors = {
     'DALL-E2': 'info',
@@ -81,13 +79,13 @@ const aiModelColors = {
                         </v-chip>
                     </div>
                     <p v-if="item.prompt" class="mt-2 text-caption">
-                        {{ languageStore.t('gallery', 'prompt') }}: {{ item.prompt }}
+                        プロンプト: {{ item.prompt }}
                     </p>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer />
                     <v-btn color="primary" variant="text" @click="dialog = false">
-                        {{ languageStore.t('gallery', 'close') }}
+                        閉じる
                     </v-btn>
                 </v-card-actions>
             </v-card>

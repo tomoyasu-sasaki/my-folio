@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import type { Skill } from '@/stores/skill'
-import { useLanguageStore } from '@/stores/language'
 
-// プロップスの型定義
+// propsの型定義
 const props = defineProps<{
     title: string
     skills: Skill[]
 }>()
-
-const languageStore = useLanguageStore()
 
 // チャートの設定
 const chartOptions = ref({
@@ -75,27 +72,21 @@ const chartOptions = ref({
 // チャートのデータシリーズ
 const chartSeries = ref([
     {
-        name: languageStore.t('skill', 'experienceLevel'),
+        name: '経験レベル',
         data: [] as number[],
         color: '#2196F3'
     },
     {
-        name: languageStore.t('skill', 'likeLevel'),
+        name: '好き度',
         data: [] as number[],
         color: '#4CAF50'
     }
 ])
 
-// 言語変更時にシリーズ名とタイトルを更新する監視関数
-watchEffect(() => {
-    chartSeries.value[0].name = languageStore.t('skill', 'experienceLevel')
-    chartSeries.value[1].name = languageStore.t('skill', 'likeLevel')
-    chartOptions.value.title.text = props.title
-})
-
 // propsの変更を監視してデータを更新
 watchEffect(() => {
     chartOptions.value.xaxis.categories = props.skills.map((skill) => skill.name)
+    chartOptions.value.title.text = props.title
     chartSeries.value[0].data = props.skills.map((skill) => skill.level)
     chartSeries.value[1].data = props.skills.map((skill) => skill.likes)
 })

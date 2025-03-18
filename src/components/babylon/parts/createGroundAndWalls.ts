@@ -1,11 +1,12 @@
 import * as BABYLON from '@babylonjs/core'
-import type { Materials } from '../types'
-import type { FloorConfig, WallOptions } from '../types'
-import { FLOOR_CONFIG } from '../types'
+import type { Materials } from './createMaterials'
 
-/**
- * 地面と壁を作成します
- */
+interface WallOptions {
+    width: number
+    height: number
+    sideOrientation: number
+}
+
 export function createGroundAndWalls(
     scene: BABYLON.Scene,
     materials: Materials,
@@ -13,222 +14,94 @@ export function createGroundAndWalls(
     wallHeight: number,
     wallOptions: WallOptions
 ): void {
-    createGround(scene, materials, FLOOR_CONFIG)
-    createWalls(scene, materials, wallHeight, wallOptions, FLOOR_CONFIG)
-    createCeilingAndUpperGround(scene, materials, floor, wallHeight, FLOOR_CONFIG)
-}
+    const yOffset = 0
 
-/**
- * 地面を作成します
- */
-function createGround(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    config: FloorConfig
-): BABYLON.Mesh {
-    const ground = BABYLON.MeshBuilder.CreateGround('ground', {
-        width: config.groundWidth,
-        height: config.groundHeight
-    }, scene)
-    ground.position.y = config.yOffset
+    // 地面の作成
+    const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 10, height: 20 }, scene)
+    ground.position.y = yOffset
     ground.material = materials.groundMaterial
-    return ground
-}
 
-/**
- * 壁を作成します
- */
-function createWalls(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    wallHeight: number,
-    wallOptions: WallOptions,
-    config: FloorConfig
-): void {
     // 前の壁
-    const frontWall = createWall(scene, materials, wallOptions, {
-        name: 'wall1',
-        position: new BABYLON.Vector3(0, wallHeight / 2 + config.yOffset, 10),
-        rotation: new BABYLON.Vector3(0, Math.PI, 0)
-    })
+    const wall1 = BABYLON.MeshBuilder.CreatePlane('wall1', wallOptions, scene)
+    wall1.position.z = 10
+    wall1.position.y = wallHeight / 2 + yOffset
+    wall1.rotation.y = Math.PI
+    wall1.material = materials.wallMaterial
 
     // 後ろの壁
-    const backWall = frontWall.clone('wall2')
-    backWall.position.z = -10
-    backWall.rotation.y = 0
-
-    // 左右の壁用のオプション
-    const sideWallOptions = { ...wallOptions, width: 20 }
+    const wall2 = wall1.clone('wall2') as BABYLON.Mesh
+    wall2.position.z = -10
+    wall2.rotation.y = 0
 
     // 左の壁
-    const leftWall = createWall(scene, materials, sideWallOptions, {
-        name: 'wall3',
-        position: new BABYLON.Vector3(-5, wallHeight / 2 + config.yOffset, 0),
-        rotation: new BABYLON.Vector3(0, Math.PI / 2, 0)
-    })
+    wallOptions.width = 20
+    const wall3 = BABYLON.MeshBuilder.CreatePlane('wall3', wallOptions, scene)
+    wall3.position.x = -5
+    wall3.position.y = wallHeight / 2 + yOffset
+    wall3.rotation.y = Math.PI / 2
+    wall3.material = materials.wallMaterial
 
     // 右の壁
-    const rightWall = leftWall.clone('wall4')
-    rightWall.position.x = 5
-    rightWall.rotation.y = -Math.PI / 2
-}
+    const wall4 = wall3.clone('wall4') as BABYLON.Mesh
+    wall4.position.x = 5
+    wall4.rotation.y = -Math.PI / 2
 
-/**
- * 個別の壁を作成します
- */
-function createWall(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    options: WallOptions,
-    {
-        name,
-        position,
-        rotation
-    }: {
-        name: string
-        position: BABYLON.Vector3
-        rotation: BABYLON.Vector3
-    }
-): BABYLON.Mesh {
-    const wall = BABYLON.MeshBuilder.CreatePlane(name, options, scene)
-    wall.position = position
-    wall.rotation = rotation
-    wall.material = materials.wallMaterial
-    return wall
-}
-
-/**
- * 天井と上階の地面を作成します
- */
-function createCeilingAndUpperGround(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    floor: number,
-    wallHeight: number,
-    config: FloorConfig
-): void {
+    // 天井と上階の地面の作成
     if (floor < 5) {
-        createSplitCeilingAndGround(scene, materials, wallHeight, config)
+        const ceiling1 = BABYLON.MeshBuilder.CreateGround(
+            'ceiling1',
+            { width: 7.3, height: 20 },
+            scene
+        )
+        ceiling1.position.x = 1.3
+        ceiling1.position.y = (wallHeight + yOffset) / 2
+        ceiling1.rotation.x = Math.PI
+        const ceilingMaterial1 = new BABYLON.StandardMaterial('ceilingMat', scene)
+        ceilingMaterial1.diffuseColor = new BABYLON.Color3(1, 1, 1)
+        ceiling1.material = ceilingMaterial1
+
+        const ceiling2 = BABYLON.MeshBuilder.CreateGround(
+            'ceiling2',
+            { width: 2.7, height: 12 },
+            scene
+        )
+        ceiling2.position.x = -3.6
+        ceiling2.position.y = (wallHeight + yOffset) / 2
+        ceiling2.position.z = -4
+        ceiling2.rotation.x = Math.PI
+        const ceilingMaterial2 = new BABYLON.StandardMaterial('ceilingMat', scene)
+        ceilingMaterial2.diffuseColor = new BABYLON.Color3(1, 1, 1)
+        ceiling2.material = ceilingMaterial2
+
+        // 上階に上がったときの地面
+        const ground1 = BABYLON.MeshBuilder.CreateGround(
+            'ground1',
+            { width: 7.3, height: 20 },
+            scene
+        )
+        ground1.position.x = 1.3
+        ground1.position.y = wallHeight / 2
+        ground1.material = materials.groundMaterial
+
+        const ground2 = BABYLON.MeshBuilder.CreateGround(
+            'ground2',
+            { width: 2.7, height: 12 },
+            scene
+        )
+        ground2.position.x = -3.6
+        ground2.position.y = wallHeight / 2
+        ground2.position.z = -4
+        ground2.material = materials.groundMaterial
     } else {
-        createFullCeiling(scene, wallHeight, config)
+        const ceiling = BABYLON.MeshBuilder.CreateGround(
+            'ceiling',
+            { width: 10, height: 20 },
+            scene
+        )
+        ceiling.position.y = (wallHeight + yOffset) / 2
+        ceiling.rotation.x = Math.PI
+        const ceilingMaterial = new BABYLON.StandardMaterial('ceilingMat', scene)
+        ceilingMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1)
+        ceiling.material = ceilingMaterial
     }
-}
-
-/**
- * 分割された天井と地面を作成します（5階未満用）
- */
-function createSplitCeilingAndGround(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    wallHeight: number,
-    config: FloorConfig
-): BABYLON.Mesh[] {
-    // 天井パート1
-    const ceiling1 = createCeilingPart(scene, {
-        name: 'ceiling1',
-        width: config.upperGroundWidth1,
-        height: config.upperGroundHeight1,
-        position: new BABYLON.Vector3(1.3, (wallHeight + config.yOffset) / 2, 0)
-    })
-
-    // 天井パート2
-    const ceiling2 = createCeilingPart(scene, {
-        name: 'ceiling2',
-        width: config.upperGroundWidth2,
-        height: config.upperGroundHeight2,
-        position: new BABYLON.Vector3(-3.6, (wallHeight + config.yOffset) / 2, -4)
-    })
-
-    // 上階の地面パート1
-    const ground1 = createUpperGroundPart(scene, materials, {
-        name: 'ground1',
-        width: config.upperGroundWidth1,
-        height: config.upperGroundHeight1,
-        position: new BABYLON.Vector3(1.3, wallHeight / 2, 0)
-    })
-
-    // 上階の地面パート2
-    const ground2 = createUpperGroundPart(scene, materials, {
-        name: 'ground2',
-        width: config.upperGroundWidth2,
-        height: config.upperGroundHeight2,
-        position: new BABYLON.Vector3(-3.6, wallHeight / 2, -4)
-    })
-
-    return [ceiling1, ceiling2, ground1, ground2]
-}
-
-/**
- * 天井パーツを作成します
- */
-function createCeilingPart(
-    scene: BABYLON.Scene,
-    {
-        name,
-        width,
-        height,
-        position
-    }: {
-        name: string
-        width: number
-        height: number
-        position: BABYLON.Vector3
-    }
-): BABYLON.Mesh {
-    const ceiling = BABYLON.MeshBuilder.CreateGround(name, { width, height }, scene)
-    ceiling.position = position
-    ceiling.rotation.x = Math.PI
-
-    const ceilingMaterial = new BABYLON.StandardMaterial(`${name}Mat`, scene)
-    ceilingMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1)
-    ceiling.material = ceilingMaterial
-
-    return ceiling
-}
-
-/**
- * 上階の地面パーツを作成します
- */
-function createUpperGroundPart(
-    scene: BABYLON.Scene,
-    materials: Materials,
-    {
-        name,
-        width,
-        height,
-        position
-    }: {
-        name: string
-        width: number
-        height: number
-        position: BABYLON.Vector3
-    }
-): BABYLON.Mesh {
-    const ground = BABYLON.MeshBuilder.CreateGround(name, { width, height }, scene)
-    ground.position = position
-    ground.material = materials.groundMaterial
-    return ground
-}
-
-/**
- * 完全な天井を作成します（5階用）
- */
-function createFullCeiling(
-    scene: BABYLON.Scene,
-    wallHeight: number,
-    config: FloorConfig
-): BABYLON.Mesh {
-    const ceiling = BABYLON.MeshBuilder.CreateGround(
-        'ceiling',
-        { width: config.groundWidth, height: config.groundHeight },
-        scene
-    )
-    ceiling.position.y = (wallHeight + config.yOffset) / 2
-    ceiling.rotation.x = Math.PI
-
-    const ceilingMaterial = new BABYLON.StandardMaterial('ceilingMat', scene)
-    ceilingMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1)
-    ceiling.material = ceilingMaterial
-
-    return ceiling
 }

@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { useCareerStore } from '@/stores/career'
-import { useLanguageStore } from '@/stores/language'
 import type { CareerCategory } from '@/stores/career'
 import CareerTimelineItem from '../parts/CareerTimelineItem.vue'
 import { computed, ref } from 'vue'
 
 const careerStore = useCareerStore()
-const languageStore = useLanguageStore()
 const items = computed(() => careerStore.getAllItems)
 
 // カテゴリーフィルター
@@ -14,10 +12,10 @@ const selectedCategory = ref<CareerCategory | null>(null)
 
 // カテゴリー一覧
 const categories = [
-    { value: null, label: 'all', icon: 'mdi-view-list' },
-    { value: 'education', label: 'education', icon: 'mdi-school' },
-    { value: 'work', label: 'work', icon: 'mdi-briefcase' },
-    { value: 'life', label: 'life', icon: 'mdi-account-heart' }
+    { value: null, label: 'すべて', icon: 'mdi-view-list' },
+    { value: 'education', label: '学歴', icon: 'mdi-school' },
+    { value: 'work', label: '職歴', icon: 'mdi-briefcase' },
+    { value: 'life', label: 'ライフイベント', icon: 'mdi-account-heart' }
 ] as const
 
 // フィルター適用後のアイテム
@@ -46,7 +44,7 @@ const filteredItems = computed(() => {
                         class="filter-btn"
                     >
                         <v-icon :icon="category.icon" class="mr-1" />
-                        <span class="btn-text">{{ languageStore.t('career', 'categories', category.label) }}</span>
+                        <span class="btn-text">{{ category.label }}</span>
                     </v-btn>
                 </v-btn-toggle>
             </v-col>
