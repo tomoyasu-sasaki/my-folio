@@ -260,7 +260,7 @@ function addTimelineContent(stack: GUI.StackPanel): void {
     stack.addControl(title)
 
     // タイムラインアイテム
-    CAREER_DATA.forEach(item => {
+    CAREER_DATA.forEach((item: CareerItem) => {
         const itemStack = createTimelineItem(item)
         stack.addControl(itemStack)
     })
@@ -342,7 +342,7 @@ function createSkillStack(): GUI.StackPanel {
  * スキルの内容を追加します
  */
 function addSkillContent(stack: GUI.StackPanel): void {
-    SKILLS_DATA.forEach(skill => {
+    SKILLS_DATA.forEach((skill: SkillItem) => {
         const skillName = new GUI.TextBlock()
         skillName.text = skill.name
         skillName.height = '40px'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProjectCard from '../parts/ProjectCard.vue'
-import { useProjectStore } from '@/stores/project'
+import { useProjectStore } from '../../../stores/project'
 import { computed } from 'vue'
 
 const projectStore = useProjectStore()

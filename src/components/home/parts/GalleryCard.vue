@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { GalleryItem } from '@/stores/gallery'
-import { useLanguageStore } from '@/stores/language'
+import type { GalleryItem } from '../../../stores/gallery'
+import { useLanguageStore } from '../../../stores/language'
 import { ref } from 'vue'
 
 defineProps<{
