@@ -88,9 +88,18 @@ const chartSeries = ref([
 
 // 言語変更時にシリーズ名とタイトルを更新する監視関数
 watchEffect(() => {
+    // 言語ストアの現在の言語に応じてシリーズ名を更新
     chartSeries.value[0].name = languageStore.t('skill', 'experienceLevel')
     chartSeries.value[1].name = languageStore.t('skill', 'likeLevel')
-    chartOptions.value.title.text = props.title
+    
+    // 言語切替時にチャートのタイトルも更新するため、props.titleではなく
+    // 直接languageStoreからカテゴリ名を取得する
+    const categoryKey = props.skills[0]?.category
+    if (categoryKey) {
+        chartOptions.value.title.text = languageStore.t('skill', 'categories', categoryKey)
+    } else {
+        chartOptions.value.title.text = props.title
+    }
 })
 
 // propsの変更を監視してデータを更新

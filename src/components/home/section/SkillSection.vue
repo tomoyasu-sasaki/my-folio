@@ -20,7 +20,7 @@ const categories: SkillCategory[] = ['frontend', 'backend', 'database', 'aws']
                 class="skill-category"
             >
                 <SkillChart
-                    :title="languageStore.t('skill', 'categories', category) as string"
+                    :title="languageStore.t('skill', 'categories', category)"
                     :skills="skillStore.getSkillsByCategory(category)"
                 />
             </v-col>

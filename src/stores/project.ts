@@ -12,6 +12,21 @@ export interface Project {
     url: string
     tags?: string[]
     status: 'completed' | 'in-progress' | 'planned' | 'end'
+    // 拡張性のあるデータ
+    details?: {
+        layout?: 'standard' | 'gallery' | 'markdown' | 'timeline'
+        mockupCount?: number
+        sections?: Array<{
+            type: 'video' | 'gallery' | 'feature-list' | 'tech-stack' | 'testimonial' | 'custom'
+            title?: string
+            content?: string | string[]
+        }>
+        githubRepo?: string
+        hasDemo?: boolean
+        demoUrl?: string
+        additionalImages?: string[]
+        customComponent?: string
+    }
 }
 
 export const useProjectStore = defineStore({
@@ -27,7 +42,8 @@ export const useProjectStore = defineStore({
             image: string,
             url: string,
             tags: string[],
-            status: 'completed' | 'in-progress' | 'planned' | 'end'
+            status: 'completed' | 'in-progress' | 'planned' | 'end',
+            details?: Project['details']
         ): Project => {
             return {
                 id,
@@ -36,6 +52,7 @@ export const useProjectStore = defineStore({
                 url,
                 tags,
                 status,
+                details,
                 get title() {
                     return languageStore.t('projectData', 'title', undefined, id) as string
                 },
@@ -52,11 +69,39 @@ export const useProjectStore = defineStore({
             projects: [
                 createProject(
                     '01',
-                    'Vue.js3',
+                    'Flutter',
                     'GastronomeJourney.png',
                     '',
-                    ['Vue.js', 'Firebase', 'Vuetify'],
-                    'end'
+                    ['Flutter', 'Firebase', 'Dart'],
+                    'end',
+                    {
+                        layout: 'gallery',
+                        mockupCount: 13,
+                        githubRepo: 'https://github.com/tomoyasu-sasaki/GastronomeJourney',
+                        hasDemo: true,
+                        demoUrl: 'https://gastronomejourney.apps',
+                        sections: [
+                            {
+                                type: 'feature-list',
+                                title: 'core-features',
+                                content: ['feature-1', 'feature-2', 'feature-3', 'feature-4']
+                            },
+                            {
+                                type: 'gallery',
+                                title: 'screenshots',
+                            },
+                            {
+                                type: 'custom',
+                                title: 'architecture',
+                                content: 'architecture-description'
+                            }
+                        ],
+                        additionalImages: [
+                            'GastronomeJourney/gastronome-architecture.png',
+                            'GastronomeJourney/gastronome-data-flow.png'
+                        ],
+                        customComponent: 'GastronomeJourneyDetail'
+                    }
                 ),
                 createProject(
                     '02',
@@ -64,7 +109,24 @@ export const useProjectStore = defineStore({
                     'Blogfy.png',
                     '',
                     ['Vue.js', 'Markdown', 'Vuetify'],
-                    'end'
+                    'end',
+                    {
+                        layout: 'markdown',
+                        mockupCount: 3,
+                        sections: [
+                            {
+                                type: 'feature-list',
+                                title: 'core-features',
+                                content: ['feature-1', 'feature-2', 'feature-3', 'feature-4']
+                            },
+                            {
+                                type: 'video',
+                                title: 'demo-video',
+                                content: 'blogfy-demo.mp4'
+                            }
+                        ],
+                        customComponent: 'BlogfyDetail'
+                    }
                 ),
                 createProject(
                     '03',
@@ -72,7 +134,22 @@ export const useProjectStore = defineStore({
                     'TeamFlow.png',
                     '',
                     ['Vue.js', 'TypeScript', 'Vuetify'],
-                    'end'
+                    'end',
+                    {
+                        layout: 'standard',
+                        mockupCount: 4,
+                        sections: [
+                            {
+                                type: 'feature-list',
+                                title: 'core-features',
+                                content: ['feature-1', 'feature-2', 'feature-3', 'feature-4']
+                            },
+                            {
+                                type: 'tech-stack',
+                                title: 'technology',
+                            }
+                        ]
+                    }
                 ),
                 createProject(
                     '04',
@@ -80,7 +157,23 @@ export const useProjectStore = defineStore({
                     'CodeLearner.png',
                     '',
                     ['Vue.js', 'TypeScript', 'Vuetify'],
-                    'end'
+                    'end',
+                    {
+                        layout: 'timeline',
+                        mockupCount: 3,
+                        sections: [
+                            {
+                                type: 'feature-list',
+                                title: 'core-features',
+                                content: ['feature-1', 'feature-2', 'feature-3', 'feature-4']
+                            },
+                            {
+                                type: 'testimonial',
+                                title: 'user-feedback',
+                                content: ['testimonial-1', 'testimonial-2', 'testimonial-3']
+                            }
+                        ]
+                    }
                 ),
                 createProject(
                     '05',
@@ -88,7 +181,18 @@ export const useProjectStore = defineStore({
                     'ConnectSphere.png',
                     '',
                     ['Vue.js', 'Firebase', 'Vuetify'],
-                    'end'
+                    'end',
+                    {
+                        layout: 'standard',
+                        mockupCount: 3,
+                        sections: [
+                            {
+                                type: 'feature-list',
+                                title: 'core-features',
+                                content: ['feature-1', 'feature-2', 'feature-3', 'feature-4']
+                            }
+                        ]
+                    }
                 )
             ] as Project[]
         }

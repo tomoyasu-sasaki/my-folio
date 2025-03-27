@@ -31,11 +31,15 @@ const languageStore = useLanguageStore()
 
                 <!-- タイトルと説明セクション -->
                 <div class="content-section">
-                    <h1 class="text-h3 font-weight-bold mb-6">{{ languageStore.t('about', 'title') }}</h1>
+                    <h1 class="text-h3 font-weight-bold mb-6">{{ languageStore.t('about', 'intro', 'title') }}</h1>
+
                     <v-card variant="text" class="description-card">
                         <v-card-text>
-                            <p v-for="(_, index) in languageStore.translations.about.ja.description" :key="index" class="description-text">
-                                {{ languageStore.t('about', 'description', index.toString()) }}
+                            <p class="description-text">
+                                {{ languageStore.t('about', 'intro', 'description') }}
+                            </p>
+                            <p class="description-text">
+                                {{ languageStore.t('about', 'philosophy', 'description') }}
                             </p>
                         </v-card-text>
                     </v-card>

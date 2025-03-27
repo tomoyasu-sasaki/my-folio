@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { Project } from '../../../stores/project'
 import { useLanguageStore } from '../../../stores/language'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 defineProps<{
     project: Project
@@ -15,10 +18,11 @@ const statusColors = {
     end: 'error'
 } as const
 
-
-function openOtherService(url: string) {
-    if (url) {
-        window.open(url, '_blank')
+function navigateToDetail(project: Project) {
+    if (project.url) {
+        window.open(project.url, '_blank')
+    } else {
+        router.push(`/project/${project.id}`)
     }
 }
 </script>
@@ -65,8 +69,7 @@ function openOtherService(url: string) {
         <v-card-actions>
             <v-btn
                 variant="outlined"
-                :disabled="!project.url"
-                @click="openOtherService(project.url)"
+                @click="navigateToDetail(project)"
                 prepend-icon="mdi-open-in-new"
             >
                 {{ languageStore.t('project', 'details') }}

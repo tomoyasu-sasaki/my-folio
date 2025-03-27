@@ -34,7 +34,7 @@ const isScrolled = computed(() => window.scrollY > 0)
                         :class="{ 'active-section': scrollStore.activeSection === section.id }"
                         @click="scrollStore.scrollToSection(section.id)"
                     >
-                        {{ languageStore.t('navigation', section.id) }}
+                        {{ languageStore.t('navigation', section.id, 'text') }}
                     </v-btn>
                 </v-col>
 
@@ -80,7 +80,7 @@ const isScrolled = computed(() => window.scrollY > 0)
                     navStore.closeMobileMenu();
                 }"
             >
-                {{ languageStore.t('navigation', section.id) }}
+                {{ languageStore.t('navigation', section.id, 'text') }}
             </v-list-item>
 
             <v-divider class="my-2" />
