@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Project, ProjectStatus } from '../../../stores/project'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
@@ -13,7 +13,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // ステータスカラーの型定義
 type StatusColorMap = {
@@ -30,13 +30,13 @@ const statusColors: StatusColorMap = {
 // プロジェクトデータの翻訳を取得する関数
 const getProjectTranslation = (key: string): string => {
     const section: SectionName = 'projectData'
-    return languageStore.t(section, 'items', props.project.id, key)
+    return t({ section, key: 'items', subKey: props.project.id, itemId: key })
 }
 
 // アクションやステータスの翻訳を取得する関数
 const getTranslation = (category: string, key: string): string => {
     const section: SectionName = 'project'
-    return languageStore.t(section, category, key, 'text')
+    return t({ section, key: category, subKey: key, itemId: 'text' })
 }
 
 // プロジェクトの画像パスを計算

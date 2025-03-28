@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Skill } from '../../../stores/skill'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 import type { ApexOptions } from 'apexcharts'
 
@@ -38,12 +38,12 @@ interface ChartSeries {
 }
 
 const props = defineProps<Props>()
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // 評価基準の翻訳を取得する関数
 const getEvaluationTranslation = (key: string): string => {
     const section: SectionName = 'skill'
-    return languageStore.t(section, 'evaluation', key, 'text')
+    return t({ section, key: 'evaluation', subKey: key, itemId: 'text' })
 }
 
 // レイアウト設定

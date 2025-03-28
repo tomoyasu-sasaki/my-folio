@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGalleryStore } from '../../../stores/gallery'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { GalleryItem } from '../../../stores/gallery'
 import type { SectionName } from '../../../locales/types'
 import GalleryCard from '../parts/GalleryCard.vue'
@@ -49,18 +49,18 @@ interface Translations {
 }
 
 const galleryStore = useGalleryStore()
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // セクション情報の翻訳を取得する関数
 const getSectionTranslation = (key: string): string => {
     const section: SectionName = 'galleryData'
-    return languageStore.t(section, 'section', key)
+    return t({ section, key: 'section', subKey: key })
 }
 
 // フィルター関連の翻訳を取得する関数
 const getFilterTranslation = (key: string): string => {
     const section: SectionName = 'gallery'
-    return languageStore.t(section, 'filter', key, 'text')
+    return t({ section, key: 'filter', subKey: key, itemId: 'text' })
 }
 
 const items = computed<GalleryItem[]>(() => galleryStore.getAllItems)

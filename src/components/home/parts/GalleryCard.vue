@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GalleryItem } from '../../../stores/gallery'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 import { ref } from 'vue'
 
@@ -40,7 +40,7 @@ interface LayoutConfig {
 
 const props = defineProps<Props>()
 const dialog = ref(false)
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // AIモデルの色設定
 const aiModelColors: AIModelConfig = {
@@ -74,13 +74,13 @@ const layoutConfig: LayoutConfig = {
 // UIテキストの翻訳を取得する関数
 const getUITranslation = (category: 'promptInfo' | 'modal', key: string): string => {
     const section: SectionName = 'gallery'
-    return languageStore.t(section, category, key, 'text')
+    return t({ section, key: category, subKey: key, itemId: 'text' })
 }
 
 // ギャラリーアイテムの翻訳を取得する関数
 const getItemTranslation = (key: string): string => {
     const section: SectionName = 'galleryData'
-    return languageStore.t(section, 'items', props.item.id, key)
+    return t({ section, key: 'items', subKey: props.item.id, itemId: key })
 }
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 import { computed } from 'vue'
 
@@ -17,15 +17,15 @@ interface LogoConfig {
     readonly alt: string
 }
 
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // 翻訳関数の型定義
 const getTranslation = (key: string, subKey?: string, field?: string): string => {
     const section: SectionName = 'about'
     if (field) {
-        return languageStore.t(section, key, subKey, field)
+        return t({ section, key, subKey, itemId: field })
     }
-    return languageStore.t(section, key, subKey)
+    return t({ section, key, subKey })
 }
 
 // 翻訳テキストを計算
