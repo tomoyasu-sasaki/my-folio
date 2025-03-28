@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { useLanguageStore } from './language'
 
+// プロジェクトのステータス型定義
+export type ProjectStatus = 'completed' | 'in-progress' | 'planned' | 'end'
+
 // プロジェクトの型定義
 export interface Project {
     id: string
@@ -11,7 +14,7 @@ export interface Project {
     image: string
     url: string
     tags?: string[]
-    status: 'completed' | 'in-progress' | 'planned' | 'end'
+    status: ProjectStatus
     // 拡張性のあるデータ
     details?: {
         layout?: 'standard' | 'gallery' | 'markdown' | 'timeline'
@@ -20,6 +23,7 @@ export interface Project {
             type: 'video' | 'gallery' | 'feature-list' | 'tech-stack' | 'testimonial' | 'custom'
             title?: string
             content?: string | string[]
+            description?: string | string[]
         }>
         githubRepo?: string
         hasDemo?: boolean
@@ -42,7 +46,7 @@ export const useProjectStore = defineStore({
             image: string,
             url: string,
             tags: string[],
-            status: 'completed' | 'in-progress' | 'planned' | 'end',
+            status: ProjectStatus,
             details?: Project['details']
         ): Project => {
             return {
@@ -53,14 +57,14 @@ export const useProjectStore = defineStore({
                 tags,
                 status,
                 details,
-                get title() {
-                    return languageStore.t('projectData', 'title', undefined, id) as string
+                get title(): string {
+                    return languageStore.t('projectData', 'items', id, 'title') as string
                 },
-                get subtitle() {
-                    return languageStore.t('projectData', 'subtitle', undefined, id) as string
+                get subtitle(): string {
+                    return languageStore.t('projectData', 'items', id, 'subtitle') as string
                 },
-                get description() {
-                    return languageStore.t('projectData', 'description', undefined, id) as string
+                get description(): string {
+                    return languageStore.t('projectData', 'items', id, 'description') as string
                 }
             }
         }
@@ -124,8 +128,7 @@ export const useProjectStore = defineStore({
                                 title: 'demo-video',
                                 content: 'blogfy-demo.mp4'
                             }
-                        ],
-                        customComponent: 'BlogfyDetail'
+                        ]
                     }
                 ),
                 createProject(
@@ -198,13 +201,14 @@ export const useProjectStore = defineStore({
         }
     },
     getters: {
-        getProjectById: (state) => {
-            return (id: string) => state.projects.find((project) => project.id === id)
+        getProjectById: (state): (id: string) => Project | undefined => {
+            return (id: string): Project | undefined =>
+                state.projects.find((project) => project.id === id)
         },
-        getProjectsByStatus: (state) => {
-            return (status: Project['status']) =>
+        getProjectsByStatus: (state): (status: Project['status']) => Project[] => {
+            return (status: Project['status']): Project[] =>
                 state.projects.filter((project) => project.status === status)
         },
-        getAllProjects: (state) => state.projects
+        getAllProjects: (state): Project[] => state.projects
     }
 }) 

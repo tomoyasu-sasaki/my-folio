@@ -1,10 +1,19 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Language } from '../locales/types'
+import { logger } from '../utils/logger'
+import type { 
+  Language, 
+  SectionName, 
+  TranslationFunction,
+  TranslationError,
+  BaseTranslationItem,
+  TranslationDict,
+  BaseTranslationDict,
+  NestedTranslationItem,
+} from '../locales/types'
 import { 
   aboutTranslations,
   careerTranslations,
-  contactTranslations,
   galleryDataTranslations,
   navigationTranslations,
   projectDataTranslations,
@@ -13,197 +22,125 @@ import {
   galleryTranslations,
   projectTranslations,
   projectDetailTranslations,
-  commonTranslations
+  commonTranslations,
 } from '../locales'
+
+// 翻訳データのマッピング
+const translationMap = {
+  navigation: navigationTranslations,
+  project: projectTranslations,
+  gallery: galleryTranslations,
+  about: aboutTranslations,
+  skill: skillTranslations,
+  career: careerTranslations,
+  languageSwitch: languageSwitchTranslations,
+  projectData: projectDataTranslations,
+  galleryData: galleryDataTranslations,
+  projectDetail: projectDetailTranslations,
+  common: commonTranslations,
+} as unknown as Record<SectionName, TranslationDict<BaseTranslationDict>>;
+
+// エラーメッセージの定義
+const errors: Record<string, TranslationError> = {
+  SECTION_NOT_FOUND: {
+    code: 'SECTION_NOT_FOUND',
+    message: '指定されたセクションが見つかりません'
+  },
+  KEY_NOT_FOUND: {
+    code: 'KEY_NOT_FOUND',
+    message: '指定されたキーが見つかりません'
+  }
+} as const;
 
 // 言語設定を管理するストア
 export const useLanguageStore = defineStore('language', () => {
-    // 現在の言語（初期値は日本語）
-    const currentLanguage = ref<Language>('ja')
+  // 現在の言語（初期値は日本語）
+  const currentLanguage = ref<Language>('ja')
     
-    // 言語を切り替える関数
-    const toggleLanguage = () => {
-        currentLanguage.value = currentLanguage.value === 'ja' ? 'en' : 'ja'
-    }
-    
-    // 特定のキーに対応する翻訳テキストを取得する関数
-    const t = (section: string, key: string, subKey?: string, itemId?: string): string => {
-        const lang = currentLanguage.value
-        
-        switch (section) {
-            case 'navigation':
-                if (key in navigationTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    const item = navigationTranslations[lang][key]
-                    if (item && typeof item === 'object' && subKey && subKey in item) {
-                        // @ts-ignore - 動的アクセスのため
-                        return item[subKey]
-                    }
-                    if (typeof item === 'object' && 'text' in item) {
-                        return item.text
-                    }
-                    return String(item)
-                }
-                break
-                
-            case 'project':
-                if (key === 'status' && subKey && subKey in projectTranslations[lang].status) {
-                    // @ts-ignore - 動的アクセスのため
-                    return projectTranslations[lang].status[subKey]
-                }
-                if (key in projectTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return projectTranslations[lang][key]
-                }
-                break
-                
-            case 'gallery':
-                if (key in galleryTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return galleryTranslations[lang][key]
-                }
-                break
-                
-            case 'about':
-                if (key in aboutTranslations[lang]) {
-                    if (subKey && itemId) {
-                        // @ts-ignore - 動的アクセスのため
-                        const nestedValue = aboutTranslations[lang][key][subKey]?.[itemId]
-                        return nestedValue ? String(nestedValue) : itemId
-                    } else if (subKey) {
-                        // @ts-ignore - 動的アクセスのため
-                        const nestedValue = aboutTranslations[lang][key][subKey]
-                        return nestedValue ? String(nestedValue) : subKey
-                    }
-                    // @ts-ignore - 動的アクセスのため
-                    return String(aboutTranslations[lang][key])
-                }
-                break
-                
-            case 'skill':
-                if (key === 'categories' && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = skillTranslations[lang].categories[subKey]
-                    return value ? String(value) : subKey
-                }
-                if (key === 'descriptions' && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = skillTranslations[lang].descriptions[subKey]
-                    return value ? String(value) : subKey
-                }
-                if (key in skillTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return String(skillTranslations[lang][key])
-                }
-                break
-                
-            case 'career':
-                if (key === 'categories' && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = careerTranslations[lang].categories[subKey]
-                    return value ? String(value) : subKey
-                }
-                if (key === 'date' && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = careerTranslations[lang][key]?.[subKey]
-                    return value ? String(value) : subKey
-                }
-                if (key === 'items' && itemId && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = careerTranslations[lang].items[itemId]?.[subKey]
-                    return value ? String(value) : subKey
-                }
-                break
-                
-            case 'languageSwitch':
-                if (key in languageSwitchTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return String(languageSwitchTranslations[lang][key])
-                }
-                break
-                
-            case 'projectData':
-                if (itemId && key) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDataTranslations[lang][itemId]?.[key]
-                    return value ? String(value) : key
-                }
-                break
-                
-            case 'galleryData':
-                if (key === 'common' && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = galleryDataTranslations[lang].common[subKey]
-                    return value ? String(value) : subKey
-                }
-                if (key === 'items' && itemId && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = galleryDataTranslations[lang].items[itemId]?.[subKey]
-                    return value ? String(value) : subKey
-                }
-                break
-                
-            case 'contact':
-                if ((key === 'form' || key === 'social') && subKey) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = contactTranslations[lang][key][subKey]
-                    return value ? String(value) : subKey
-                }
-                break
-                
-            case 'projectDetail':
-                if (key === 'sectionTitles' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].sectionTitles[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key === 'customContent' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].customContent[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key === 'testimonials' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].testimonials[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key === 'screen' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].screen[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key === 'type' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].type[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key === 'feature' && itemId) {
-                    // @ts-ignore - 動的アクセスのため
-                    const value = projectDetailTranslations[lang].feature[itemId]
-                    return value ? String(value) : itemId
-                }
-                if (key in projectDetailTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return String(projectDetailTranslations[lang][key])
-                }
-                break
-                
-            case 'common':
-                if (key in commonTranslations[lang]) {
-                    // @ts-ignore - 動的アクセスのため
-                    return String(commonTranslations[lang][key])
-                }
-                break
+  // 言語を切り替える関数
+  const toggleLanguage = (): void => {
+    currentLanguage.value = currentLanguage.value === 'ja' ? 'en' : 'ja'
+  }
+
+  // 翻訳値を取得する関数
+  const getTranslationValue = (
+    translations: BaseTranslationDict,
+    key: string,
+    subKey?: string,
+    itemId?: string
+  ): string => {
+    try {
+      if (itemId && key && subKey) {
+        const item = translations[key] as NestedTranslationItem | undefined
+        const subItem = item?.[subKey] as NestedTranslationItem | undefined
+        const value = subItem?.[itemId]
+        if (typeof value === 'object' && value !== null && 'text' in value) {
+          return (value as BaseTranslationItem).text
         }
-        
-        return key
+        return value ? String(value) : itemId
+      }
+      
+      if (key === 'categories' && subKey) {
+        const categories = translations.categories as NestedTranslationItem | undefined
+        const value = categories?.[subKey]
+        if (typeof value === 'object' && value !== null && 'name' in value) {
+          const nameValue = value.name as BaseTranslationItem
+          return nameValue.text
+        }
+        return value ? String(value) : subKey
+      }
+      
+      if (subKey) {
+        const item = translations[key] as NestedTranslationItem | undefined
+        const value = item?.[subKey]
+        if (typeof value === 'object' && value !== null && 'text' in value) {
+          return (value as BaseTranslationItem).text
+        }
+        return value ? String(value) : subKey
+      }
+      
+      if (key in translations) {
+        const value = translations[key]
+        if (typeof value === 'object' && value !== null && 'text' in value) {
+          return (value as BaseTranslationItem).text
+        }
+        return String(value)
+      }
+      
+      throw { ...errors.KEY_NOT_FOUND, key }
+    } catch (error) {
+      logger.error('Translation value retrieval error', { key, subKey, itemId }, error as TranslationError)
+      return key
     }
+  }
     
-    return {
-        currentLanguage,
-        toggleLanguage,
-        t
+  // 特定のキーに対応する翻訳テキストを取得する関数
+  const t: TranslationFunction = (section, key, subKey?, itemId?) => {
+    const lang = currentLanguage.value
+    
+    try {
+      // セクションの存在確認
+      if (!(section in translationMap)) {
+        throw { ...errors.SECTION_NOT_FOUND, section }
+      }
+      
+      // 翻訳データの取得
+      const translations = translationMap[section][lang]
+      
+      // 翻訳値の取得
+      return getTranslationValue(translations, key, subKey, itemId)
+    } catch (error) {
+      const err = error as TranslationError
+      logger.error('Translation error', { section, key, subKey, itemId, lang }, err)
+      return key
     }
+  }
+    
+  return {
+    currentLanguage,
+    toggleLanguage,
+    t
+  }
 }, {
-    persist: true
+  persist: true
 }) 

@@ -7,12 +7,12 @@ import SkillSection from '../components/home/section/SkillSection.vue'
 // import BlogSection from '../components/home/section/BlogSection.vue'
 import GallerySection from '../components/home/section/GallerySection.vue'
 import CarrerSection from '../components/home/section/CarrerSection.vue'
-// import ContactSection from '../components/home/section/ContactSection.vue'
 
 import { onMounted, onUnmounted, reactive } from 'vue'
 import { useScrollStore } from '../stores/scroll'
 import { useLanguageStore } from '../stores/language'
 import { useRouter } from 'vue-router'
+import { logger } from '../utils/logger'
 
 const router = useRouter()
 const store = useScrollStore()
@@ -20,7 +20,7 @@ const languageStore = useLanguageStore()
 
 // マウス位置トラッキング用の状態
 const mousePos = reactive({ x: 0, y: 0 })
-const updateMousePos = (e: MouseEvent) => {
+const updateMousePos = (e: MouseEvent): void => {
   mousePos.x = e.clientX
   mousePos.y = e.clientY
 }
@@ -36,31 +36,32 @@ const sections = [
   { id: 'about', component: AboutSection, bgClass: '' },
   { id: 'project', component: ProjectSection, bgClass: 'bg-gradient-1' },
   { id: 'skill', component: SkillSection, bgClass: 'bg-gradient-2' },
-  // { id: 'blog', component: BlogSection, bgClass: 'bg-gradient-3' },
+//   { id: 'blog', component: BlogSection, bgClass: 'bg-gradient-3' },
   { id: 'gallery', component: GallerySection, bgClass: 'bg-gradient-4' },
-  { id: 'career', component: CarrerSection, bgClass: 'bg-gradient-5' },
-  // { id: 'contact', component: ContactSection, bgClass: '' }
+  { id: 'career', component: CarrerSection, bgClass: 'bg-gradient-5' }
 ]
 
 // 翻訳されたセクションタイトルを取得する関数
-const getSectionTitle = (sectionId: string) => {
-  return languageStore.t('navigation', sectionId)
+const getSectionTitle = (sectionId: string): string => {
+    return languageStore.t('navigation', sectionId, 'text')
 }
 
 // Intersection Observerのコールバック
-const observerCallback = (entries: IntersectionObserverEntry[]) => {
+const observerCallback = (entries: IntersectionObserverEntry[]): void => {
   entries.forEach(entry => {
     const sectionId = entry.target.getAttribute('data-section-id')
     if (sectionId) {
       if (entry.isIntersecting) {
+        // アニメーション状態を更新
         animatedSections[sectionId] = true
+        logger.debug('Section became visible', { sectionId })
       }
     }
   })
 }
 
 // スクロールイベントのハンドラー
-const handleScroll = () => {
+const handleScroll = (): void => {
     requestAnimationFrame(() => {
         store.updateActiveSection()
     })
@@ -76,20 +77,48 @@ onMounted(() => {
     
     // Intersection Observerの設定
     const observer = new IntersectionObserver(observerCallback, {
-      threshold: 0.2,
-      rootMargin: '0px'
+      threshold: 0.1, // より早くアニメーションを開始
+      rootMargin: '50px' // ビューポートの上下50pxの位置でトリガー
     })
     
-    // 各セクションを監視
+    // 各セクションを監視し、スクロールストアに登録
     sections.forEach(section => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.observe(element)
-        // 初期状態を設定
-        animatedSections[section.id] = false
+        // スクロールストアにセクション要素を登録
+        store.registerSectionRef(section.id, element)
+        // 初期状態を設定（aboutセクション以外）
+        if (section.id !== 'about') {
+          animatedSections[section.id] = false
+        }
+      } else {
+        logger.warn(`Section element not found: ${section.id}`)
+      }
+    })
+
+    // 初期スクロール位置に基づいてアクティブセクションを設定
+    store.updateActiveSection()
+
+    // 初期表示時に画面内に表示されているセクションをアニメーション表示
+    sections.forEach(section => {
+      const element = document.getElementById(section.id)
+      if (element && isElementInViewport(element)) {
+        animatedSections[section.id] = true
       }
     })
 })
+
+// 要素が画面内に表示されているかを判定する関数
+const isElementInViewport = (element: HTMLElement): boolean => {
+  const rect = element.getBoundingClientRect()
+  return (
+    rect.top >= -50 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 50 &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  )
+}
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll)
@@ -99,50 +128,22 @@ onUnmounted(() => {
 
 <template>
     <Header />
-    <v-main class="pt-0">
-        <!-- About セクション（特別扱い） -->
-        <section
-            :ref="el => store.registerSectionRef('about', el as HTMLElement)"
-            class="section-container"
-            id="about"
-            data-section-id="about"
-            :class="{ 'animated-in': animatedSections['about'] }"
+    <main>
+        <div 
+            v-for="{ id, component, bgClass } in sections" 
+            :id="id"
+            :key="id" 
+            :class="[
+                bgClass, 
+                'section-container',
+                { 'animated-in': animatedSections[id] }
+            ]"
+            :data-section-id="id"
         >
-            <AboutSection />
-        </section>
-
-        <!-- 他のセクションを動的に生成 -->
-        <template v-for="section in sections.slice(1)" :key="section.id">
-            <section 
-                v-if="section.component" 
-                :ref="el => store.registerSectionRef(section.id, el as HTMLElement)" 
-                class="section-container"
-                :id="section.id"
-                :data-section-id="section.id"
-                :class="{ 'animated-in': animatedSections[section.id] }"
-            >
-                <div 
-                    :class="[section.bgClass, 'section-header']" 
-                    v-if="section.bgClass"
-                    :style="{
-                        '--mouse-x': `${mousePos.x}px`,
-                        '--mouse-y': `${mousePos.y}px`
-                    }"
-                >
-                    <div class="interactive-particle"></div>
-                    <div class="interactive-particle"></div>
-                    <div class="interactive-particle"></div>
-                    
-                    <h1 class="sec-title" :class="{ 'title-animated': animatedSections[section.id] }">
-                        <span v-for="(char, index) in getSectionTitle(section.id)" :key="index" :style="`--char-index: ${index}`">
-                            {{ char }}
-                        </span>
-                    </h1>
-                </div>
-                <component :is="section.component" />
-            </section>
-        </template>
-    </v-main>
+            <h2 class="text-h4 text-center mb-8">{{ getSectionTitle(id) }}</h2>
+            <component :is="component" />
+        </div>
+    </main>
     <Footer />
 </template>
 
@@ -153,6 +154,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s ease, transform 0.8s ease;
+    padding: 2rem 0;
 }
 
 .section-container.animated-in {
@@ -203,23 +205,23 @@ onUnmounted(() => {
 
 /* モダンなグラデーション背景 */
 .bg-gradient-1 {
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(to bottom right, var(--v-theme-primary), var(--v-theme-secondary));
 }
 
 .bg-gradient-2 {
-    background: linear-gradient(135deg, #10b981, #3b82f6);
+    background: linear-gradient(to bottom right, var(--v-theme-secondary), var(--v-theme-info));
 }
 
 .bg-gradient-3 {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    background: linear-gradient(to bottom right, var(--v-theme-info), var(--v-theme-success));
 }
 
 .bg-gradient-4 {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: linear-gradient(to bottom right, var(--v-theme-success), var(--v-theme-warning));
 }
 
 .bg-gradient-5 {
-    background: linear-gradient(135deg, #14b8a6, #22c55e);
+    background: linear-gradient(to bottom right, var(--v-theme-warning), var(--v-theme-error));
 }
 
 /* 装飾エフェクト */
@@ -293,5 +295,14 @@ onUnmounted(() => {
         width: 100px;
         height: 100px;
     }
+}
+
+main {
+    min-height: 100vh;
+}
+
+h2 {
+    padding-top: 2rem;
+    color: var(--v-theme-on-surface);
 }
 </style>

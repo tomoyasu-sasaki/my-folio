@@ -1,7 +1,6 @@
 export * from './types';
 export * from './about';
 export * from './career';
-export * from './contact';
 export * from './galleryData';
 export * from './languageSwitch';
 export * from './navigation';

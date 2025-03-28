@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import blogTestData from '../../test/blogdata.json'
+import { logger } from '../../../utils/logger'
 
 interface BlogPost {
     id: string
@@ -9,18 +9,24 @@ interface BlogPost {
     category: string
     title: string
     description?: string
+    link: string
 }
 
 const router = useRouter()
 const searchQuery = ref('')
 const selectedCategory = ref<string | null>(null)
 
-// ブログデータの初期化と日付の検証
-const blogPosts = ref<BlogPost[]>(blogTestData.map(post => ({
-    ...post,
-    // 日付が不正な場合は現在の日付を使用
-    date: isValidDate(post.date) ? post.date : new Date().toISOString().split('T')[0]
-})))
+// ブログデータの初期化
+const blogPosts = ref<BlogPost[]>([
+    {
+        id: '1',
+        date: '2024-03-27',
+        category: 'Tech',
+        title: 'ポートフォリオサイトのリファクタリング',
+        description: 'Vue.js + TypeScriptで作成したポートフォリオサイトのリファクタリング作業記録',
+        link: 'https://github.com/tmys-syk/my-folio'
+    }
+])
 
 // 日付が有効かチェック
 function isValidDate(dateString: string): boolean {
@@ -56,7 +62,7 @@ const filteredBlogPosts = computed(() => {
                 }
             })
     } catch (error) {
-        console.error('ブログ記事のフィルタリングエラー:', error)
+        logger.error('ブログ記事のフィルタリングエラー:', error)
         return []
     }
 })
@@ -75,17 +81,17 @@ const formatDate = (dateString: string): string => {
             day: '2-digit'
         }).format(date)
     } catch (error) {
-        console.error('日付フォーマットエラー:', error)
+        logger.error('日付フォーマットエラー:', error)
         return '日付不明'
     }
 }
 
 // ブログ記事ページへの遷移
-const goToBlogPost = (postId: string) => {
+const goToBlogPost = (postId: string): void => {
     try {
         router.push({ name: 'blogpost', params: { id: postId } })
     } catch (error) {
-        console.error('ページ遷移エラー:', error)
+        logger.error('ページ遷移エラー:', error)
     }
 }
 </script>
@@ -137,9 +143,9 @@ const goToBlogPost = (postId: string) => {
                     <v-list v-if="filteredBlogPosts.length > 0" style="background-color: transparent !important">
                         <template v-for="(post, index) in filteredBlogPosts" :key="post.id">
                             <v-list-item
-                                @click="goToBlogPost(post.id)"
-                                :ripple="true"
-                                class="blog-item"
+                            :ripple="true"
+                            class="blog-item"
+                            @click="goToBlogPost(post.id)"
                             >
                                 <div class="d-flex flex-column">
                                     <div class="d-flex align-center mb-3">

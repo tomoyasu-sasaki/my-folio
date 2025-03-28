@@ -1,24 +1,49 @@
 <script setup lang="ts">
-import type { Project } from '../../../stores/project'
+import type { Project, ProjectStatus } from '../../../stores/project'
 import { useLanguageStore } from '../../../stores/language'
+import type { SectionName } from '../../../locales/types'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const router = useRouter()
 
-defineProps<{
+interface Props {
     project: Project
-}>()
+}
+
+const props = defineProps<Props>()
 
 const languageStore = useLanguageStore()
 
-const statusColors = {
+// ステータスカラーの型定義
+type StatusColorMap = {
+    readonly [K in ProjectStatus]: string
+}
+
+const statusColors: StatusColorMap = {
     completed: 'success',
     'in-progress': 'info',
     planned: 'warning',
     end: 'error'
 } as const
 
-function navigateToDetail(project: Project) {
+// プロジェクトデータの翻訳を取得する関数
+const getProjectTranslation = (key: string): string => {
+    const section: SectionName = 'projectData'
+    return languageStore.t(section, 'items', props.project.id, key)
+}
+
+// アクションやステータスの翻訳を取得する関数
+const getTranslation = (category: string, key: string): string => {
+    const section: SectionName = 'project'
+    return languageStore.t(section, category, key, 'text')
+}
+
+// プロジェクトの画像パスを計算
+const imagePath = computed(() => `/my-folio/img/Project/${props.project.image}`)
+
+// 詳細ページへの遷移関数
+function navigateToDetail(project: Project): void {
     if (project.url) {
         window.open(project.url, '_blank')
     } else {
@@ -30,7 +55,7 @@ function navigateToDetail(project: Project) {
 <template>
     <v-card class="project-card" variant="outlined" elevation="2">
         <v-img
-            :src="`/my-folio/img/Project/${project.image}`"
+            :src="imagePath"
             height="200"
             width="200"
             cover
@@ -38,21 +63,21 @@ function navigateToDetail(project: Project) {
         />
 
         <v-card-title class="d-flex align-center">
-            {{ project.title }}
+            {{ getProjectTranslation('title') }}
             <v-chip
                 :color="statusColors[project.status]"
                 size="small"
                 class="ml-2"
                 label
             >
-                {{ languageStore.t('project', 'status', project.status) }}
+                {{ getTranslation('status', project.status) }}
             </v-chip>
         </v-card-title>
 
-        <v-card-subtitle>{{ project.subtitle }}</v-card-subtitle>
+        <v-card-subtitle>{{ getProjectTranslation('subtitle') }}</v-card-subtitle>
 
         <v-card-text v-if="project.description">
-            {{ project.description }}
+            {{ getProjectTranslation('description') }}
             <div class="mt-2">
                 <v-chip
                     v-for="tag in project.tags"
@@ -69,10 +94,10 @@ function navigateToDetail(project: Project) {
         <v-card-actions>
             <v-btn
                 variant="outlined"
-                @click="navigateToDetail(project)"
                 prepend-icon="mdi-open-in-new"
+                @click="navigateToDetail(project)"
             >
-                {{ languageStore.t('project', 'details') }}
+                {{ getTranslation('action', 'details') }}
             </v-btn>
         </v-card-actions>
     </v-card>

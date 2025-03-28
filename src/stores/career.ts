@@ -36,14 +36,14 @@ export const useCareerStore = defineStore({
                 category,
                 icon,
                 color,
-                get title() {
-                    return languageStore.t('career', 'items', 'title', id) as string
+                get title(): string {
+                    return languageStore.t('career', 'items', id, 'title') as string
                 },
-                get subtitle() {
-                    return languageStore.t('career', 'items', 'subtitle', id) as string
+                get subtitle(): string {
+                    return languageStore.t('career', 'items', id, 'subtitle') as string
                 },
-                get description() {
-                    return languageStore.t('career', 'items', 'description', id) as string
+                get description(): string {
+                    return languageStore.t('career', 'items', id, 'description') as string
                 }
             }
         }
@@ -111,12 +111,13 @@ export const useCareerStore = defineStore({
     },
     getters: {
         getAllItems: (state) => state.items,
-        getItemsByCategory: (state) => {
-            return (category: CareerCategory) =>
+        getItemsByCategory: (state): (category: CareerCategory) => CareerItem[] => {
+            return (category: CareerCategory): CareerItem[] =>
                 state.items.filter((item) => item.category === category)
         },
-        getItemById: (state) => {
-            return (id: string) => state.items.find((item) => item.id === id)
+        getItemById: (state): (id: string) => CareerItem | undefined => {
+            return (id: string): CareerItem | undefined =>
+                state.items.find((item) => item.id === id)
         }
     }
 }) 

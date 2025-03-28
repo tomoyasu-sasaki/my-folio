@@ -29,3 +29,5 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+doc/my-folioリファクタリング進捗管理.md
