@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import type { GalleryItem } from '../../../stores/gallery'
+import type { GalleryItemWithTranslation } from '../../../composables/useGalleryData'
 import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import type { CSSProperties } from 'vue'
 
 // プロップスの型定義
 interface Props {
-    readonly item: GalleryItem
-    readonly mode?: 'grid' | 'carousel'
+    item: GalleryItemWithTranslation
+    mode: 'grid' | 'carousel'
 }
 
 // AIモデル関連の型定義
@@ -18,23 +19,33 @@ type AIModelConfig = Record<AIModel, AIModelColor>
 
 // レイアウト設定の型定義
 interface LayoutConfig {
-    readonly spacing: {
-        readonly padding: number
-        readonly borderRadius: number
-        readonly imageHeight: {
-            readonly default: number
-            readonly mobile: number
-            readonly carousel: number
-            readonly carouselMobile: number
+    grid: {
+        aspectRatio: string
+        imageHeight: number
+        titleLines: number
+        descriptionLines: number
+    }
+    carousel: {
+        aspectRatio: string
+        imageHeight: number
+        titleLines: number
+        descriptionLines: number
+    }
+    animation: {
+        duration: string
+        scale: number
+    }
+    overlay: {
+        opacity: number
+        padding: number
+    }
+    spacing: {
+        borderRadius: number
+        imageHeight: {
+            mobile: number
+            carousel: number
+            carouselMobile: number
         }
-    }
-    readonly animation: {
-        readonly duration: string
-        readonly scale: number
-    }
-    readonly overlay: {
-        readonly padding: number
-        readonly opacity: number
     }
 }
 
@@ -51,25 +62,67 @@ const aiModelColors: AIModelConfig = {
 
 // レイアウト設定
 const layoutConfig: LayoutConfig = {
+    grid: {
+        aspectRatio: '4/3',
+        imageHeight: 200,
+        titleLines: 2,
+        descriptionLines: 3
+    },
+    carousel: {
+        aspectRatio: '16/9',
+        imageHeight: 400,
+        titleLines: 2,
+        descriptionLines: 4
+    },
+    animation: {
+        duration: '0.3s',
+        scale: 1.02
+    },
+    overlay: {
+        opacity: 0.7,
+        padding: 16
+    },
     spacing: {
-        padding: 16,
         borderRadius: 8,
         imageHeight: {
-            default: 280,
             mobile: 200,
             carousel: 600,
             carouselMobile: 400
         }
-    },
-    animation: {
-        duration: '0.2s',
-        scale: 1.02
-    },
-    overlay: {
-        padding: 16,
-        opacity: 0.7
     }
 } as const
+
+// 現在のモードのレイアウト設定を取得
+const currentLayout = computed(() => layoutConfig[props.mode])
+
+// 画像のスタイル
+const imageStyle = computed<CSSProperties>(() => ({
+    height: `${currentLayout.value.imageHeight}px`,
+    aspectRatio: currentLayout.value.aspectRatio,
+    objectFit: 'cover'
+}))
+
+// タイトルのスタイル
+const titleStyle = computed<CSSProperties>(() => ({
+    display: '-webkit-box',
+    WebkitLineClamp: currentLayout.value.titleLines,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden'
+} as CSSProperties))
+
+// 説明文のスタイル
+const descriptionStyle = computed<CSSProperties>(() => ({
+    display: '-webkit-box',
+    WebkitLineClamp: currentLayout.value.descriptionLines,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden'
+} as CSSProperties))
+
+// オーバーレイのスタイル
+const overlayStyle = computed<CSSProperties>(() => ({
+    background: `linear-gradient(to top, rgba(0, 0, 0, ${layoutConfig.overlay.opacity}), transparent)`,
+    padding: `${layoutConfig.overlay.padding}px`
+}))
 
 // UIテキストの翻訳を取得する関数
 const getUITranslation = (category: 'promptInfo' | 'modal', key: string): string => {
@@ -89,10 +142,9 @@ const getItemTranslation = (key: string): string => {
         <!-- サムネイル表示 -->
         <v-img
             :src="props.item.imagePath"
+            :style="imageStyle"
             :alt="getItemTranslation('title')"
             class="gallery-image"
-            :height="props.mode === 'carousel' ? '100%' : layoutConfig.spacing.imageHeight.default"
-            :width="'100%'"
             :cover="props.mode === 'grid'"
             :contain="props.mode === 'carousel'"
             :class="{ 'carousel-image': props.mode === 'carousel' }"
@@ -105,12 +157,14 @@ const getItemTranslation = (key: string): string => {
             </template>
             <!-- オーバーレイ情報（グリッドモード時のみ） -->
             <template v-if="props.mode === 'grid'" #default>
-                <div class="image-overlay">
+                <div class="image-overlay" :style="overlayStyle">
                     <div class="overlay-content">
                         <v-chip :color="aiModelColors[props.item.aiModel]" size="small" class="mb-2">
                             {{ props.item.aiModel }}
                         </v-chip>
-                        <div class="text-subtitle-2 font-weight-bold">{{ getItemTranslation('title') }}</div>
+                        <div class="text-subtitle-2 font-weight-bold text-truncate" :style="titleStyle">
+                            {{ getItemTranslation('title') }}
+                        </div>
                         <div class="text-caption">{{ props.item.createdAt }}</div>
                     </div>
                 </div>
@@ -134,7 +188,7 @@ const getItemTranslation = (key: string): string => {
                 </v-card-title>
                 <v-card-subtitle>{{ props.item.createdAt }}</v-card-subtitle>
                 <v-card-text>
-                    <p>{{ getItemTranslation('description') }}</p>
+                    <p class="text-wrap" :style="descriptionStyle">{{ getItemTranslation('description') }}</p>
                     <div class="mt-2">
                         <v-chip
                             v-for="tag in props.item.tags"
@@ -170,7 +224,7 @@ const getItemTranslation = (key: string): string => {
 }
 
 .gallery-card:not(.carousel-mode):hover {
-    transform: v-bind('`scale(${layoutConfig.animation.scale})`');
+    transform: scale(v-bind('layoutConfig.animation.scale'));
 }
 
 .gallery-image {
@@ -191,13 +245,10 @@ const getItemTranslation = (key: string): string => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: v-bind('`linear-gradient(to top, rgba(0, 0, 0, ${layoutConfig.overlay.opacity}), transparent)`');
     opacity: 0;
     transition: opacity v-bind('layoutConfig.animation.duration') ease;
-    border-radius: v-bind('`${layoutConfig.spacing.borderRadius}px`');
     display: flex;
     align-items: flex-end;
-    padding: v-bind('`${layoutConfig.overlay.padding}px`');
 }
 
 .gallery-card:hover .image-overlay {
@@ -222,6 +273,11 @@ const getItemTranslation = (key: string): string => {
 
 .dialog-image {
     background-color: rgba(0, 0, 0, 0.9);
+}
+
+.text-wrap {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 @media (max-width: 600px) {

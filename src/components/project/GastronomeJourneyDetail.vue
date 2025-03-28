@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useLanguageStore } from '../../stores/language'
-import type { Project } from '../../stores/project'
-
+import { useTranslation } from '../../composables/useTranslation'
+import type { ProjectWithTranslation } from '../../composables/useProjectData'
 // 機能アイコンの型定義
 type FeatureKey = `feature-${1 | 2 | 3 | 4}`
 type FeatureIconMap = {
@@ -10,10 +9,10 @@ type FeatureIconMap = {
 }
 
 const props = defineProps<{
-  project: Project
+  project: ProjectWithTranslation
 }>()
 
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // 画像パスの設定
 const imageConfig = {
@@ -51,38 +50,41 @@ function getMockupImagePath(index: number): string {
 
 // 基本情報の翻訳を取得する関数
 function getBasicInfo(key: string): string {
-  return languageStore.t('projectDetail', 'basicInfo', key, 'text')
+  return t({ section: 'projectDetail', key: 'basicInfo', subKey: key, itemId: 'text' })
 }
 
 // ボタンの翻訳を取得する関数
 function getButton(key: string): string {
-  return languageStore.t('projectDetail', 'buttons', key, 'text')
+  return t({ section: 'projectDetail', key: 'buttons', subKey: key, itemId: 'text' })
 }
 
 // セクションタイトルの翻訳を取得する関数
 function getSectionTitle(key: string): string {
-  return languageStore.t('projectDetail', 'sections', key, 'text')
+  return t({ section: 'projectDetail', key: 'sections', subKey: key, itemId: 'text' })
 }
 
 // 機能の翻訳を取得する関数
-function getFeature(key: string, subKey: string): string {
-  return languageStore.t('projectDetail', 'feature', key, subKey)
+function getFeature(key: string, subKey: string = 'text'): string {
+  // project.idとkeyを使って、正しい翻訳キーを生成
+  const featureKey = `${props.project?.id}-${key}`;
+  return t({ section: 'projectDetail', key: 'feature', subKey: featureKey, itemId: subKey });
 }
 
 // スクリーンの翻訳を取得する関数
 function getScreen(key: string): string {
-  return languageStore.t('projectDetail', 'screen', key, 'text')
+  return t({ section: 'projectDetail', key: 'screen', subKey: key, itemId: 'text' })
 }
 
 // プロジェクトタイプの翻訳を取得する関数
 function getType(key: string): string {
-  return languageStore.t('projectDetail', 'type', key, 'text')
+  return t({ section: 'projectDetail', key: 'type', subKey: key, itemId: 'text' })
 }
 
 // カスタムコンテンツの翻訳を取得する関数
 function getCustomContent(key: string): string {
-  return languageStore.t('projectDetail', 'customContent', key, 'text')
+  return t({ section: 'projectDetail', key: 'customContent', subKey: key, itemId: 'text' })
 }
+
 </script>
 
 <template>
@@ -140,11 +142,11 @@ function getCustomContent(key: string): string {
                 <v-icon
                 :icon="featureIcons[`feature-${i}` as FeatureKey] || 'mdi-check-circle'" 
                   color="primary" size="large" class="mr-3"></v-icon>
-                {{ getFeature(`${project.id}-${i}`, 'text') }}
+                {{ getFeature(i.toString(), 'text') }}
               </v-card-title>
               <v-card-text>
                 <p class="text-body-2">
-                  {{ getFeature(`${project.id}-${i}`, 'description') }}
+                  {{ getFeature(i.toString(), 'description') }}
                 </p>
               </v-card-text>
             </v-card>
@@ -202,9 +204,8 @@ function getCustomContent(key: string): string {
         
         <!-- プロジェクト情報 -->
         <v-card class="pa-4 mb-6" variant="outlined">
-          <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
-          
-          <v-list density="compact" class="bg-transparent">
+          <h3 class="text-h5 mb-4">{{ getBasicInfo('info') }}</h3>
+          <v-list>
             <v-list-item>
               <template #prepend>
                 <v-icon color="primary">mdi-code-tags</v-icon>
@@ -212,15 +213,17 @@ function getCustomContent(key: string): string {
               <v-list-item-title>{{ getBasicInfo('language') }}</v-list-item-title>
               <v-list-item-subtitle>{{ project.language }}</v-list-item-subtitle>
             </v-list-item>
-            
+
             <v-list-item>
               <template #prepend>
-                <v-icon color="primary">mdi-application</v-icon>
+                <v-icon color="primary">mdi-flag</v-icon>
               </template>
-              <v-list-item-title>{{ getBasicInfo('projectType') }}</v-list-item-title>
-              <v-list-item-subtitle>{{ getType(project.id) }}</v-list-item-subtitle>
+              <v-list-item-title>{{ getBasicInfo('status') }}</v-list-item-title>
+              <v-list-item-subtitle>
+                {{ getType(project.status) }}
+              </v-list-item-subtitle>
             </v-list-item>
-            
+
             <v-list-item v-if="project.details?.githubRepo">
               <template #prepend>
                 <v-icon color="primary">mdi-github</v-icon>
@@ -238,7 +241,7 @@ function getCustomContent(key: string): string {
                 </v-btn>
               </v-list-item-subtitle>
             </v-list-item>
-            
+
             <v-list-item v-if="project.details?.demoUrl">
               <template #prepend>
                 <v-icon color="primary">mdi-web</v-icon>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { CareerItem } from '../../../stores/career'
+import type { CareerItemWithTranslation } from '../../../composables/useCareerData'
 import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 
 // プロップスの型定義
 interface Props {
-    readonly item: CareerItem
+    readonly item: CareerItemWithTranslation
 }
 
 // 日付フォーマット関連の型定義

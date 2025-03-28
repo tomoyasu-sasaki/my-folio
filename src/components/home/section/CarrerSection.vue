@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useCareerStore } from '../../../stores/career'
-import { useLanguageStore } from '../../../stores/language'
-import type { CareerCategory, CareerItem } from '../../../stores/career'
+import { useTranslation } from '../../../composables/useTranslation'
+import type { CareerCategory } from '../../../stores/normalized/career'
 import type { SectionName } from '../../../locales/types'
 import CareerTimelineItem from '../parts/CareerTimelineItem.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useCareerData } from '../../../composables/useCareerData'
+import type { CareerItemWithTranslation } from '../../../composables/useCareerData'
 
 // レイアウト設定の型定義
 interface LayoutConfig {
@@ -59,25 +60,23 @@ interface Translations {
     readonly description: string
 }
 
-const careerStore = useCareerStore()
-const languageStore = useLanguageStore()
+const { initialize, allItems } = useCareerData()
+const { t } = useTranslation()
 
 // セクション情報の翻訳を取得する関数
 const getSectionTranslation = (key: string): string => {
     const section: SectionName = 'career'
-    return languageStore.t(section, 'section', key) as string
+    return t({ section, key: 'section', subKey: key })
 }
 
 // カテゴリー名の翻訳を取得する関数
 const getCategoryTranslation = (category: CategoryItem): string => {
     const section: SectionName = 'career'
     if (!category.value) {
-        return languageStore.t(section, 'categories', 'all') as string
+        return t({ section, key: 'categories', subKey: 'all' })
     }
-    return languageStore.t(section, 'categories', category.value) as string
+    return t({ section, key: 'categories', subKey: category.value })
 }
-
-const items = computed<CareerItem[]>(() => careerStore.getAllItems)
 
 // カテゴリーフィルター
 const selectedCategory = ref<CareerCategory | null>(null)
@@ -130,10 +129,26 @@ const layoutConfig: LayoutConfig = {
     }
 } as const
 
-// フィルター適用後のアイテム
-const filteredItems = computed<CareerItem[]>(() => {
-    if (!selectedCategory.value) return items.value
-    return careerStore.getItemsByCategory(selectedCategory.value)
+const items = computed<CareerItemWithTranslation[]>(() => allItems.value)
+
+// カテゴリー別のアイテムをメモ化
+const itemsByCategory = computed(() => {
+    const categoryMap = new Map<CareerCategory, CareerItemWithTranslation[]>()
+    items.value.forEach(item => {
+        const category = item.category
+        const categoryItems = categoryMap.get(category) || []
+        categoryItems.push(item)
+        categoryMap.set(category, categoryItems)
+    })
+    return categoryMap
+})
+
+// フィルタリングされたアイテムをメモ化
+const filteredItems = computed(() => {
+    if (!selectedCategory.value) {
+        return items.value
+    }
+    return itemsByCategory.value.get(selectedCategory.value) || []
 })
 
 // 翻訳テキスト
@@ -141,6 +156,10 @@ const translations = computed<Translations>(() => ({
     title: getSectionTranslation('title'),
     description: getSectionTranslation('description')
 }))
+
+onMounted(() => {
+    initialize()
+})
 </script>
 
 <template>

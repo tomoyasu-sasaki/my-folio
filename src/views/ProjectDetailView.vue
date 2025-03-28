@@ -1,37 +1,43 @@
 <script setup lang="ts">
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, defineAsyncComponent } from 'vue'
-import { useProjectStore } from '../stores/project'
-import { useLanguageStore } from '../stores/language'
+import { useTranslation } from '../composables/useTranslation'
 import Footer from '../components/global/FooterView.vue'
 import { logger } from '../utils/logger'
+import { useProjectData } from '../composables/useProjectData'
+import GastronomeJourneyDetail from '../components/project/GastronomeJourneyDetail.vue'
+
 const route = useRoute()
 const router = useRouter()
-const projectStore = useProjectStore()
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
+const { getProjectWithTranslation } = useProjectData()
 
-// URLからプロジェクトIDを取得
+// プロジェクトIDを取得
 const projectId = computed(() => route.params.id as string)
 
-// プロジェクト詳細を取得
-const project = computed(() => projectStore.getProjectById(projectId.value))
+// プロジェクトデータを取得
+const project = computed(() => getProjectWithTranslation(projectId.value))
+
+// プロジェクトが見つからない場合はホームにリダイレクト
+watch(project, (value) => {
+    if (!value) {
+        logger.error('Project not found', { projectId: projectId.value })
+        router.push('/')
+    }
+})
 
 // レイアウトタイプの取得
 const layoutType = computed(() => project.value?.details?.layout || 'standard')
 
-// カスタムコンポーネントがあれば動的にロードする
+// カスタムコンポーネントの判定
 const customComponent = computed(() => {
-  if (project.value?.details?.customComponent) {
-    try {
-      return defineAsyncComponent(() => 
-        import(`../components/project/${project.value?.details?.customComponent}.vue`)
-      )
-    } catch (e) {
-      logger.error('Custom component not found:', e)
-      return null
+    if (!project.value?.details?.customComponent) return null
+    switch (project.value.details.customComponent) {
+        case 'GastronomeJourneyDetail':
+            return GastronomeJourneyDetail
+        default:
+            return null
     }
-  }
-  return null
 })
 
 // モックアップ画像の数を取得
@@ -61,44 +67,44 @@ const openUrl = (url?: string): void => {
 
 // 基本情報の翻訳を取得
 const getBasicInfo = (key: string): string => {
-  return languageStore.t('projectDetail', 'basicInfo', key, 'text')
+  return t({ section: 'projectDetail', key: 'basicInfo', subKey: key, itemId: 'text' })
 }
 
 // ボタンの翻訳を取得
 const getButton = (key: string): string => {
-  return languageStore.t('projectDetail', 'buttons', key, 'text')
+  return t({ section: 'projectDetail', key: 'buttons', subKey: key, itemId: 'text' })
 }
 
 // セクションタイトルの翻訳を取得
 const getSectionTitle = (key: string): string => {
-  return languageStore.t('projectDetail', 'sections', key, 'text')
+  return t({ section: 'projectDetail', key: 'sections', subKey: key, itemId: 'text' })
 }
 
 // カスタムコンテンツの翻訳を取得
 const getCustomContent = (key: string): string => {
-  return languageStore.t('projectDetail', 'customContent', key, 'text')
+  return t({ section: 'projectDetail', key: 'customContent', subKey: key, itemId: 'text' })
 }
 
 // 機能の翻訳を取得
 const getFeature = (key: string, subKey: string = 'text'): string => {
   // project.idとkeyを使って、正しい翻訳キーを生成
   const featureKey = `${project.value?.id}-${key}`;
-  return languageStore.t('projectDetail', 'feature', featureKey, subKey);
+  return t({ section: 'projectDetail', key: 'feature', subKey: featureKey, itemId: subKey });
 }
 
 // スクリーンの翻訳を取得
 const getScreen = (key: string): string => {
-  return languageStore.t('projectDetail', 'screen', key, 'text')
+  return t({ section: 'projectDetail', key: 'screen', subKey: key, itemId: 'text' })
 }
 
 // タイプの翻訳を取得
 const getType = (key: string): string => {
-  return languageStore.t('projectDetail', 'type', key, 'text')
+  return t({ section: 'projectDetail', key: 'type', subKey: key, itemId: 'text' })
 }
 
 // テスティモニアルの翻訳を取得
 const getTestimonial = (key: string): string => {
-  return languageStore.t('projectDetail', 'testimonials', key, 'text')
+  return t({ section: 'projectDetail', key: 'testimonials', subKey: key, itemId: 'text' })
 }
 </script>
 
@@ -111,7 +117,7 @@ const getTestimonial = (key: string): string => {
         class="mb-6"
         @click="goBack"
       >
-        {{ languageStore.t('common', 'navigation', 'back', 'text') }}
+        {{ t({ section: 'common', key: 'navigation', subKey: 'back', itemId: 'text' }) }}
       </v-btn>
 
       <!-- プロジェクトヘッダー -->
@@ -132,7 +138,7 @@ const getTestimonial = (key: string): string => {
               class="mr-2"
               label
             >
-              {{ languageStore.t('project', 'status', project.status, 'text') }}
+              {{ t({ section: 'project', key: 'status', subKey: project.status, itemId: 'text' }) }}
             </v-chip>
             <span class="text-body-1">{{ project.subtitle }}</span>
           </div>
@@ -157,7 +163,7 @@ const getTestimonial = (key: string): string => {
               prepend-icon="mdi-open-in-new"
               @click="() => openUrl(project?.url)"
             >
-              {{ languageStore.t('project', 'action', 'visit', 'text') }}
+              {{ t({ section: 'project', key: 'action', subKey: 'visit', itemId: 'text' }) }}
             </v-btn>
             
             <v-btn 

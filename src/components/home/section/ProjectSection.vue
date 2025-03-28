@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ProjectCard from '../parts/ProjectCard.vue'
-import { useProjectStore } from '../../../stores/project'
+import { useProjectData } from '../../../composables/useProjectData'
 import { useTranslation } from '../../../composables/useTranslation'
-import type { Project } from '../../../stores/project'
+import type { ProjectWithTranslation } from '../../../composables/useProjectData'
 import type { SectionName } from '../../../locales/types'
 import { computed } from 'vue'
 
@@ -27,9 +27,9 @@ interface LayoutConfig {
     spacing: SpacingConfig
 }
 
-const projectStore = useProjectStore()
+const { allProjects } = useProjectData()
 const { t } = useTranslation()
-const projects = computed<Project[]>(() => projectStore.getAllProjects)
+const projects = computed<ProjectWithTranslation[]>(() => allProjects.value)
 
 // 翻訳関数の定義
 const getTranslation = (key: string, subKey?: string): string => {
