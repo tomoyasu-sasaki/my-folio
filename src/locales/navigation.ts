@@ -1,20 +1,20 @@
-import type { TranslationDict } from './types';
+import type { TranslationDict, NavigationTranslationItem } from './types'
 
-interface NavigationItemTranslation {
-  text: string;
-  ariaLabel: string;
-}
-
+/**
+ * ナビゲーション翻訳アイテムの型定義
+ */
 interface NavigationTranslation {
-  home: NavigationItemTranslation;
-  about: NavigationItemTranslation;
-  skill: NavigationItemTranslation;
-  career: NavigationItemTranslation;
-  project: NavigationItemTranslation;
-  gallery: NavigationItemTranslation;
-  contact: NavigationItemTranslation;
+  home: NavigationTranslationItem;
+  about: NavigationTranslationItem;
+  skill: NavigationTranslationItem;
+  career: NavigationTranslationItem;
+  project: NavigationTranslationItem;
+  gallery: NavigationTranslationItem;
 }
 
+/**
+ * ナビゲーション翻訳データ
+ */
 export const navigationTranslations: TranslationDict<NavigationTranslation> = {
   ja: {
     home: {
@@ -40,10 +40,6 @@ export const navigationTranslations: TranslationDict<NavigationTranslation> = {
     gallery: {
       text: 'ギャラリー',
       ariaLabel: 'ギャラリーページへ'
-    },
-    contact: {
-      text: 'お問い合わせ',
-      ariaLabel: 'お問い合わせページへ'
     }
   },
   en: {
@@ -70,10 +66,6 @@ export const navigationTranslations: TranslationDict<NavigationTranslation> = {
     gallery: {
       text: 'Gallery',
       ariaLabel: 'Go to gallery page'
-    },
-    contact: {
-      text: 'Contact',
-      ariaLabel: 'Go to contact page'
     }
   }
 }; 

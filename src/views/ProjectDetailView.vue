@@ -3,9 +3,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, defineAsyncComponent } from 'vue'
 import { useProjectStore } from '../stores/project'
 import { useLanguageStore } from '../stores/language'
-import Header from '../components/home/parts/HomeHeader.vue'
 import Footer from '../components/global/FooterView.vue'
-
+import { logger } from '../utils/logger'
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -28,7 +27,7 @@ const customComponent = computed(() => {
         import(`../components/project/${project.value?.details?.customComponent}.vue`)
       )
     } catch (e) {
-      console.error('Custom component not found:', e)
+      logger.error('Custom component not found:', e)
       return null
     }
   }
@@ -49,13 +48,61 @@ onMounted(() => {
 })
 
 // 前のページに戻る
-const goBack = () => {
+const goBack = (): void => {
   router.back()
+}
+
+// リンクを開く関数
+const openUrl = (url?: string): void => {
+  if (typeof window !== 'undefined' && url) {
+    window.open(url, '_blank')
+  }
+}
+
+// 基本情報の翻訳を取得
+const getBasicInfo = (key: string): string => {
+  return languageStore.t('projectDetail', 'basicInfo', key, 'text')
+}
+
+// ボタンの翻訳を取得
+const getButton = (key: string): string => {
+  return languageStore.t('projectDetail', 'buttons', key, 'text')
+}
+
+// セクションタイトルの翻訳を取得
+const getSectionTitle = (key: string): string => {
+  return languageStore.t('projectDetail', 'sections', key, 'text')
+}
+
+// カスタムコンテンツの翻訳を取得
+const getCustomContent = (key: string): string => {
+  return languageStore.t('projectDetail', 'customContent', key, 'text')
+}
+
+// 機能の翻訳を取得
+const getFeature = (key: string, subKey: string = 'text'): string => {
+  // project.idとkeyを使って、正しい翻訳キーを生成
+  const featureKey = `${project.value?.id}-${key}`;
+  return languageStore.t('projectDetail', 'feature', featureKey, subKey);
+}
+
+// スクリーンの翻訳を取得
+const getScreen = (key: string): string => {
+  return languageStore.t('projectDetail', 'screen', key, 'text')
+}
+
+// タイプの翻訳を取得
+const getType = (key: string): string => {
+  return languageStore.t('projectDetail', 'type', key, 'text')
+}
+
+// テスティモニアルの翻訳を取得
+const getTestimonial = (key: string): string => {
+  return languageStore.t('projectDetail', 'testimonials', key, 'text')
 }
 </script>
 
 <template>
-  <Header />
   <v-main>
     <v-container v-if="project" class="py-10">
       <v-btn
@@ -64,7 +111,7 @@ const goBack = () => {
         class="mb-6"
         @click="goBack"
       >
-        {{ languageStore.t('common', 'back') }}
+        {{ languageStore.t('common', 'navigation', 'back', 'text') }}
       </v-btn>
 
       <!-- プロジェクトヘッダー -->
@@ -85,7 +132,7 @@ const goBack = () => {
               class="mr-2"
               label
             >
-              {{ languageStore.t('project', 'status', project.status) }}
+              {{ languageStore.t('project', 'status', project.status, 'text') }}
             </v-chip>
             <span class="text-body-1">{{ project.subtitle }}</span>
           </div>
@@ -104,34 +151,34 @@ const goBack = () => {
           <!-- プロジェクトリンクボタン -->
           <div class="action-buttons mt-4">
             <v-btn 
-              v-if="project.url" 
+              v-if="project && project.url" 
               color="primary" 
               class="mr-2"
               prepend-icon="mdi-open-in-new"
-              @click="window.open(project.url, '_blank')"
+              @click="() => openUrl(project?.url)"
             >
-              {{ languageStore.t('project', 'visit') }}
+              {{ languageStore.t('project', 'action', 'visit', 'text') }}
             </v-btn>
             
             <v-btn 
-              v-if="project.details?.demoUrl" 
+              v-if="project && project.details?.demoUrl" 
               color="info" 
               class="mr-2"
               prepend-icon="mdi-play-circle"
-              @click="window.open(project.details.demoUrl, '_blank')"
+              @click="() => openUrl(project?.details?.demoUrl)"
             >
-              {{ languageStore.t('projectDetail', 'demoButton') }}
+              {{ getButton('demoButton') }}
             </v-btn>
 
             <v-btn 
-              v-if="project.details?.githubRepo" 
+              v-if="project && project.details?.githubRepo" 
               color="default" 
               class="mr-2"
               variant="outlined"
               prepend-icon="mdi-github"
-              @click="window.open(project.details.githubRepo, '_blank')"
+              @click="() => openUrl(project?.details?.githubRepo)"
             >
-              {{ languageStore.t('projectDetail', 'githubButton') }}
+              {{ getButton('githubButton') }}
             </v-btn>
           </div>
         </div>
@@ -141,8 +188,8 @@ const goBack = () => {
 
       <!-- カスタムコンポーネントがあれば表示 -->
       <component 
-        v-if="customComponent" 
-        :is="customComponent"
+        :is="customComponent" 
+        v-if="customComponent"
         :project="project" 
       />
 
@@ -153,7 +200,7 @@ const goBack = () => {
           <v-row>
             <v-col cols="12" md="8">
               <!-- 説明セクション -->
-              <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'description') }}</h2>
+              <h2 class="text-h4 mb-4">{{ getBasicInfo('description') }}</h2>
               <p class="text-body-1 mb-4">{{ project.description }}</p>
 
               <!-- プロジェクトの各セクションを動的に表示 -->
@@ -161,15 +208,15 @@ const goBack = () => {
                 <!-- 機能リスト -->
                 <template v-if="section.type === 'feature-list'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
-                  <v-list>
-                    <v-list-item v-for="feature in section.content" :key="feature">
-                      <template v-slot:prepend>
+                  <v-list bg-color="transparent">
+                    <v-list-item v-for="(_, i) in section.content" :key="i">
+                      <template #prepend>
                         <v-icon color="primary">mdi-check-circle</v-icon>
                       </template>
                       <v-list-item-title>
-                        {{ languageStore.t('projectDetail', 'feature', undefined, feature) }}
+                        {{ getFeature((i + 1).toString()) }}
                       </v-list-item-title>
                     </v-list-item>
                   </v-list>
@@ -178,7 +225,7 @@ const goBack = () => {
                 <!-- テクノロジースタック -->
                 <template v-else-if="section.type === 'tech-stack'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-row>
                     <v-col v-for="tag in project.tags" :key="tag" cols="6" sm="4" md="3">
@@ -193,24 +240,29 @@ const goBack = () => {
                 <!-- カスタムセクション -->
                 <template v-else-if="section.type === 'custom'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <p class="text-body-1">
-                    {{ languageStore.t('projectDetail', 'customContent', undefined, section.content) }}
+                    {{ typeof section.content === 'string' ? getCustomContent(section.content) : '' }}
                   </p>
                 </template>
 
                 <!-- ユーザーの声 -->
                 <template v-else-if="section.type === 'testimonial'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-row>
-                    <v-col v-for="(testimonial, i) in section.content" :key="i" cols="12" md="4">
-                      <v-card variant="outlined" class="pa-4 h-100">
-                        <v-card-text class="text-body-1 font-italic">
-                          {{ languageStore.t('projectDetail', 'testimonials', undefined, testimonial) }}
-                        </v-card-text>
+                    <v-col v-for="(_, i) in section.content" :key="i" cols="12" md="4">
+                      <v-card variant="outlined" class="pa-4 mb-3 testimonial-card">
+                        <div class="d-flex align-start">
+                          <v-avatar color="primary" class="mr-3">
+                            <v-icon color="white">mdi-account</v-icon>
+                          </v-avatar>
+                          <v-card-text class="text-body-1 font-italic pa-0">
+                            {{ getTestimonial((i + 1).toString()) }}
+                          </v-card-text>
+                        </div>
                       </v-card>
                     </v-col>
                   </v-row>
@@ -219,7 +271,7 @@ const goBack = () => {
                 <!-- ビデオセクション -->
                 <template v-else-if="section.type === 'video'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <div class="video-container">
                     <video 
@@ -235,22 +287,22 @@ const goBack = () => {
             <v-col cols="12" md="4">
               <!-- プロジェクト概要サイドバー -->
               <v-card variant="outlined" class="pa-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'overview') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'language') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('language') }}</div>
                   <div>{{ project.language }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'projectType') }}</div>
-                  <div>{{ languageStore.t('projectDetail', 'type', undefined, project.id) }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('projectType') }}</div>
+                  <div>{{ getType(project.id) }}</div>
                 </div>
               </v-card>
 
               <!-- モックアップカルーセル -->
               <v-card variant="outlined" class="pa-4 mt-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'mockups') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('mockups') }}</h3>
                 <v-carousel
                   height="300"
                   hide-delimiters
@@ -268,7 +320,7 @@ const goBack = () => {
                       gradient="to bottom, rgba(0,0,0,0) 70%, rgba(0,0,0,0.7) 100%"
                     >
                       <v-card-text class="text-white text-subtitle-2 position-absolute bottom-0">
-                        {{ languageStore.t('projectDetail', 'screen', undefined, `${project.id}-${n}`) }}
+                        {{ getScreen(`${project.id}-${n}`) }}
                       </v-card-text>
                     </v-img>
                   </v-carousel-item>
@@ -283,7 +335,7 @@ const goBack = () => {
           <v-row>
             <v-col cols="12" md="7">
               <!-- 説明セクション -->
-              <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'description') }}</h2>
+              <h2 class="text-h4 mb-4">{{ getBasicInfo('description') }}</h2>
               <p class="text-body-1 mb-6">{{ project.description }}</p>
 
               <!-- プロジェクト特徴とカスタムセクション -->
@@ -291,13 +343,13 @@ const goBack = () => {
                 <!-- 機能リスト -->
                 <template v-if="section.type === 'feature-list'">
                   <h2 class="text-h4 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-row>
-                    <v-col v-for="(feature, i) in section.content" :key="i" cols="12" md="6">
+                    <v-col v-for="(_, i) in section.content" :key="i" cols="12" md="6">
                       <v-card variant="outlined" class="pa-4 mb-4 feature-card">
                         <v-icon color="primary" size="large" class="feature-icon">mdi-check-circle</v-icon>
-                        <h3 class="text-h6 my-2">{{ languageStore.t('projectDetail', 'feature', undefined, feature) }}</h3>
+                        <h3 class="text-h6 my-2">{{ getFeature((i + 1).toString()) }}</h3>
                       </v-card>
                     </v-col>
                   </v-row>
@@ -306,11 +358,11 @@ const goBack = () => {
                 <!-- カスタムセクション -->
                 <template v-else-if="section.type === 'custom'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-card variant="outlined" class="pa-6 mb-6">
                     <p class="text-body-1">
-                      {{ languageStore.t('projectDetail', 'customContent', undefined, section.content) }}
+                      {{ typeof section.content === 'string' ? getCustomContent(section.content) : '' }}
                     </p>
                   </v-card>
                 </template>
@@ -318,7 +370,7 @@ const goBack = () => {
 
               <!-- 追加画像があれば表示 -->
               <div v-if="project.details?.additionalImages && project.details.additionalImages.length > 0" class="mt-8">
-                <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'sectionTitles', undefined, 'architecture') }}</h2>
+                <h2 class="text-h4 mb-4">{{ getSectionTitle('architecture') }}</h2>
                 <v-row>
                   <v-col v-for="(image, index) in project.details.additionalImages" :key="index" cols="12" md="6">
                     <v-card variant="outlined" class="pa-4">
@@ -337,20 +389,20 @@ const goBack = () => {
             <v-col cols="12" md="5">
               <!-- プロジェクト情報カード -->
               <v-card variant="outlined" class="pa-4 mb-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'overview') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'language') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('language') }}</div>
                   <div>{{ project.language }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'projectType') }}</div>
-                  <div>{{ languageStore.t('projectDetail', 'type', undefined, project.id) }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('projectType') }}</div>
+                  <div>{{ getType(project.id) }}</div>
                 </div>
 
                 <div class="mb-4">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'techStack') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('techStack') }}</div>
                   <div class="d-flex flex-wrap mt-2">
                     <v-chip
                       v-for="tag in project.tags"
@@ -369,18 +421,18 @@ const goBack = () => {
               <template v-for="(section, index) in sections" :key="`gallery-${index}`">
                 <template v-if="section.type === 'gallery'">
                   <h3 class="text-h5 mt-6 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h3>
                   <v-row dense>
-                    <v-col v-for="n in mockupCount" :key="`mockup-${n}`" cols="6">
-                      <v-card class="mb-4">
+                    <v-col v-for="(_, i) in section.content" :key="i" cols="6" variant="outlined">
+                      <v-card class="mb-4" variant="outlined">
                         <v-img
-                          :src="`/my-folio/img/Project/mockup-${project.id}-${n}.png`"
+                          :src="`/my-folio/img/Project/mockup-${project.id}-${i + 1}.png`"
                           height="150"
                           cover
                           class="rounded"
                         >
-                          <template v-slot:placeholder>
+                          <template #placeholder>
                             <v-row
                               class="fill-height ma-0"
                               align="center"
@@ -394,7 +446,7 @@ const goBack = () => {
                           </template>
                         </v-img>
                         <v-card-text class="pa-2 text-center text-caption">
-                          {{ languageStore.t('projectDetail', 'screen', undefined, `${project.id}-${n}`) }}
+                          {{ getScreen(`${project.id}-${i + 1}`) }}
                         </v-card-text>
                       </v-card>
                     </v-col>
@@ -410,7 +462,7 @@ const goBack = () => {
           <v-row>
             <v-col cols="12" md="8">
               <!-- 説明セクション -->
-              <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'description') }}</h2>
+              <h2 class="text-h4 mb-4">{{ getBasicInfo('description') }}</h2>
               <v-card variant="outlined" class="pa-6 mb-6">
                 <p class="text-body-1">{{ project.description }}</p>
               </v-card>
@@ -420,16 +472,16 @@ const goBack = () => {
                 <!-- 機能リスト -->
                 <template v-if="section.type === 'feature-list'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-card variant="outlined" class="pa-4 mb-6">
-                    <v-list>
-                      <v-list-item v-for="feature in section.content" :key="feature">
-                        <template v-slot:prepend>
+                    <v-list bg-color="transparent">
+                      <v-list-item v-for="(_, i) in section.content" :key="i">
+                        <template #prepend>
                           <v-icon color="primary">mdi-check-circle</v-icon>
                         </template>
                         <v-list-item-title>
-                          {{ languageStore.t('projectDetail', 'feature', undefined, feature) }}
+                          {{ getFeature((i + 1).toString()) }}
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
@@ -439,7 +491,7 @@ const goBack = () => {
                 <!-- ビデオセクション -->
                 <template v-else-if="section.type === 'video'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-card variant="outlined" class="pa-4 mb-6">
                     <div class="video-container">
@@ -457,20 +509,20 @@ const goBack = () => {
             <v-col cols="12" md="4">
               <!-- サイドバー情報 -->
               <v-card variant="outlined" class="pa-4 mb-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'overview') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'language') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('language') }}</div>
                   <div>{{ project.language }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'projectType') }}</div>
-                  <div>{{ languageStore.t('projectDetail', 'type', undefined, project.id) }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('projectType') }}</div>
+                  <div>{{ getType(project.id) }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'techStack') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('techStack') }}</div>
                   <div class="d-flex flex-wrap mt-2">
                     <v-chip
                       v-for="tag in project.tags"
@@ -487,7 +539,7 @@ const goBack = () => {
 
               <!-- モックアップ表示 -->
               <v-card variant="outlined" class="pa-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'mockups') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('mockups') }}</h3>
                 <v-carousel
                   height="300"
                   hide-delimiters
@@ -505,7 +557,7 @@ const goBack = () => {
                       gradient="to bottom, rgba(0,0,0,0) 70%, rgba(0,0,0,0.7) 100%"
                     >
                       <v-card-text class="text-white text-subtitle-2 position-absolute bottom-0">
-                        {{ languageStore.t('projectDetail', 'screen', undefined, `${project.id}-${n}`) }}
+                        {{ getScreen(`${project.id}-${n}`) }}
                       </v-card-text>
                     </v-img>
                   </v-carousel-item>
@@ -520,71 +572,74 @@ const goBack = () => {
           <v-row>
             <v-col cols="12" md="8">
               <!-- 説明セクション -->
-              <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'description') }}</h2>
+              <h2 class="text-h4 mb-4">{{ getBasicInfo('description') }}</h2>
               <p class="text-body-1 mb-6">{{ project.description }}</p>
 
               <!-- タイムラインで機能を表示 -->
               <template v-for="(section, index) in sections" :key="index">
-                <template v-if="section.type === 'feature-list'">
+                <div v-if="section.type === 'feature-list'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   
                   <v-timeline side="end">
                     <v-timeline-item
-                      v-for="(feature, i) in section.content"
-                      :key="feature"
+                      v-for="(_, i) in section.content"
+                      :key="i"
                       :dot-color="['primary', 'secondary', 'info', 'success'][i % 4]"
                       size="small"
+                      class="feature-timeline-item"
                     >
-                      <v-card variant="outlined" class="pa-4 mb-3">
-                        <h3 class="text-h6 mb-2">{{ languageStore.t('projectDetail', 'feature', undefined, feature) }}</h3>
+                      <v-card variant="outlined" class="pa-4 mb-3 feature-timeline-card">
+                        <h3 class="text-h6 mb-2">{{ getFeature((i + 1).toString()) }}</h3>
                         <p class="text-body-2">
-                          {{ languageStore.t('projectDetail', 'feature', undefined, feature) }}
+                          {{ getFeature((i + 1).toString(), 'description') }}
                         </p>
                       </v-card>
                     </v-timeline-item>
                   </v-timeline>
-                </template>
+                </div>
 
                 <!-- ユーザーの声 -->
-                <template v-else-if="section.type === 'testimonial'">
+                <div v-else-if="section.type === 'testimonial'">
                   <h2 class="text-h4 mt-8 mb-4">
-                    {{ languageStore.t('projectDetail', 'sectionTitles', undefined, section.title) }}
+                    {{ getSectionTitle(section.title || '') }}
                   </h2>
                   <v-row>
-                    <v-col v-for="(testimonial, i) in section.content" :key="i" cols="12">
+                    <v-col v-for="(_, i) in section.content" :key="i" cols="12">
                       <v-card variant="outlined" class="pa-4 mb-3 testimonial-card">
-                        <v-avatar class="mb-3" color="primary">
-                          <v-icon color="white">mdi-account</v-icon>
-                        </v-avatar>
-                        <v-card-text class="text-body-1 font-italic">
-                          {{ languageStore.t('projectDetail', 'testimonials', undefined, testimonial) }}
-                        </v-card-text>
+                        <div class="d-flex align-start">
+                          <v-avatar color="primary" class="mr-3">
+                            <v-icon color="white">mdi-account</v-icon>
+                          </v-avatar>
+                          <v-card-text class="text-body-1 font-italic pa-0">
+                            {{ getTestimonial((i + 1).toString()) }}
+                          </v-card-text>
+                        </div>
                       </v-card>
                     </v-col>
                   </v-row>
-                </template>
+                </div>
               </template>
             </v-col>
             
             <v-col cols="12" md="4">
               <!-- プロジェクト情報カード -->
               <v-card variant="outlined" class="pa-4 mb-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'overview') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'language') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('language') }}</div>
                   <div>{{ project.language }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'projectType') }}</div>
-                  <div>{{ languageStore.t('projectDetail', 'type', undefined, project.id) }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('projectType') }}</div>
+                  <div>{{ getType(project.id) }}</div>
                 </div>
                 
                 <div class="mb-3">
-                  <div class="text-subtitle-2 font-weight-bold">{{ languageStore.t('projectDetail', 'techStack') }}</div>
+                  <div class="text-subtitle-2 font-weight-bold">{{ getBasicInfo('techStack') }}</div>
                   <div class="d-flex flex-wrap mt-2">
                     <v-chip
                       v-for="tag in project.tags"
@@ -601,10 +656,10 @@ const goBack = () => {
 
               <!-- モックアップ表示 -->
               <v-card variant="outlined" class="pa-4">
-                <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'mockups') }}</h3>
+                <h3 class="text-h5 mb-4">{{ getBasicInfo('mockups') }}</h3>
                 <v-row dense>
                   <v-col v-for="n in mockupCount" :key="`mockup-${n}`" cols="12">
-                    <v-card class="mb-4">
+                    <v-card class="mb-4" variant="outlined">
                       <v-img
                         :src="`/my-folio/img/Project/mockup-${project.id}-${n}.png`"
                         height="200"
@@ -612,7 +667,7 @@ const goBack = () => {
                         class="rounded"
                       ></v-img>
                       <v-card-text class="pa-2">
-                        {{ languageStore.t('projectDetail', 'screen', undefined, `${project.id}-${n}`) }}
+                        {{ getScreen(`${project.id}-${n}`) }}
                       </v-card-text>
                     </v-card>
                   </v-col>
@@ -679,13 +734,24 @@ const goBack = () => {
 
 .testimonial-card {
   position: relative;
-  padding-top: 30px;
 }
 
-.testimonial-card .v-avatar {
-  position: absolute;
-  top: -20px;
-  left: 20px;
+.testimonial-avatar {
+  flex-shrink: 0;
+}
+
+.feature-timeline-item {
+  margin-bottom: 24px;
+}
+
+.feature-timeline-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.feature-timeline-card:hover {
+  transform: translateY(-5px);
 }
 
 /* レスポンシブ対応 */

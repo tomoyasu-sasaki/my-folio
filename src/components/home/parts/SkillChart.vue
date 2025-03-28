@@ -1,46 +1,100 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { computed } from 'vue'
 import type { Skill } from '../../../stores/skill'
 import { useLanguageStore } from '../../../stores/language'
+import type { SectionName } from '../../../locales/types'
+import type { ApexOptions } from 'apexcharts'
 
 // プロップスの型定義
-const props = defineProps<{
-    title: string
-    skills: Skill[]
-}>()
+interface Props {
+    readonly title: string
+    readonly skills: readonly Skill[]
+}
 
+// レイアウト設定の型定義
+interface LayoutConfig {
+    readonly chart: {
+        readonly height: number
+        readonly fontSize: {
+            readonly title: string
+            readonly labels: string
+        }
+        readonly columnWidth: string
+        readonly borderRadius: number
+    }
+    readonly card: {
+        readonly padding: number
+        readonly margin: {
+            readonly y: number
+        }
+    }
+}
+
+// チャートのデータシリーズの型定義
+interface ChartSeries {
+    readonly name: string
+    readonly data: readonly number[]
+    readonly color: string
+}
+
+const props = defineProps<Props>()
 const languageStore = useLanguageStore()
 
+// 評価基準の翻訳を取得する関数
+const getEvaluationTranslation = (key: string): string => {
+    const section: SectionName = 'skill'
+    return languageStore.t(section, 'evaluation', key, 'text')
+}
+
+// レイアウト設定
+const layoutConfig: LayoutConfig = {
+    chart: {
+        height: 350,
+        fontSize: {
+            title: '20px',
+            labels: '12px'
+        },
+        columnWidth: '55%',
+        borderRadius: 4
+    },
+    card: {
+        padding: 4,
+        margin: {
+            y: 2
+        }
+    }
+} as const
+
 // チャートの設定
-const chartOptions = ref({
+const chartOptions = computed<ApexOptions>(() => ({
     chart: {
         toolbar: {
             show: false
         },
-        type: 'bar' as const,
+        type: 'bar',
         fontFamily: 'Roboto, sans-serif',
         background: 'transparent'
     },
     plotOptions: {
         bar: {
             horizontal: false,
-            columnWidth: '55%',
-            borderRadius: 4
+            columnWidth: layoutConfig.chart.columnWidth,
+            borderRadius: layoutConfig.chart.borderRadius
         }
     },
     xaxis: {
-        categories: [] as string[],
+        categories: props.skills.map((skill) => skill.name),
         labels: {
             style: {
-                fontSize: '12px'
+                fontSize: layoutConfig.chart.fontSize.labels
             }
         }
     },
     title: {
-        text: '',
-        align: 'center' as const,
+        text: props.title,
+        align: 'center',
         style: {
-            fontSize: '20px',
+            fontSize: layoutConfig.chart.fontSize.title,
             fontWeight: 'bold'
         }
     },
@@ -51,72 +105,54 @@ const chartOptions = ref({
     },
     tooltip: {
         y: {
-            formatter: (val: number) => `${val}%`
+            formatter: (val: number): string => `${val}%`
         },
         theme: 'dark'
     },
     yaxis: {
+        min: 0,
         max: 100,
         tickAmount: 4,
         labels: {
-            formatter: (val: number) => `${val}%`
+            formatter: (val: number): string => `${val}%`
         }
     },
     legend: {
-        position: 'top' as const,
-        horizontalAlign: 'center' as const
+        position: 'top',
+        horizontalAlign: 'center'
     },
     grid: {
         borderColor: '#e0e0e0',
         strokeDashArray: 5
     }
-})
+}))
 
 // チャートのデータシリーズ
-const chartSeries = ref([
+const chartSeries = computed<readonly ChartSeries[]>(() => [
     {
-        name: languageStore.t('skill', 'experienceLevel'),
-        data: [] as number[],
+        name: getEvaluationTranslation('experience'),
+        data: props.skills.map((skill) => skill.level),
         color: '#2196F3'
     },
     {
-        name: languageStore.t('skill', 'likeLevel'),
-        data: [] as number[],
+        name: getEvaluationTranslation('preference'),
+        data: props.skills.map((skill) => Math.max(0, skill.likes)),
         color: '#4CAF50'
     }
-])
-
-// 言語変更時にシリーズ名とタイトルを更新する監視関数
-watchEffect(() => {
-    // 言語ストアの現在の言語に応じてシリーズ名を更新
-    chartSeries.value[0].name = languageStore.t('skill', 'experienceLevel')
-    chartSeries.value[1].name = languageStore.t('skill', 'likeLevel')
-    
-    // 言語切替時にチャートのタイトルも更新するため、props.titleではなく
-    // 直接languageStoreからカテゴリ名を取得する
-    const categoryKey = props.skills[0]?.category
-    if (categoryKey) {
-        chartOptions.value.title.text = languageStore.t('skill', 'categories', categoryKey)
-    } else {
-        chartOptions.value.title.text = props.title
-    }
-})
-
-// propsの変更を監視してデータを更新
-watchEffect(() => {
-    chartOptions.value.xaxis.categories = props.skills.map((skill) => skill.name)
-    chartSeries.value[0].data = props.skills.map((skill) => skill.level)
-    chartSeries.value[1].data = props.skills.map((skill) => skill.likes)
-})
+] as const)
 </script>
 
 <template>
-    <v-card class="pa-4 my-2" elevation="2" style="background-color: transparent !important">
+    <v-card 
+        :class="`pa-${layoutConfig.card.padding} my-${layoutConfig.card.margin.y}`" 
+        elevation="2" 
+        style="background-color: transparent !important"
+    >
         <v-row justify="center">
             <v-col>
                 <apexchart
                     type="bar"
-                    height="350"
+                    :height="layoutConfig.chart.height"
                     :options="chartOptions"
                     :series="chartSeries"
                 />

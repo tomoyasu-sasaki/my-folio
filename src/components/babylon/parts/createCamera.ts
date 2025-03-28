@@ -195,9 +195,7 @@ export function restoreCameraState(
 export function animateCamera(
     camera: BABYLON.UniversalCamera,
     targetPosition: BABYLON.Vector3,
-    targetRotation?: BABYLON.Vector3,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    duration: number = 1000
+    targetRotation?: BABYLON.Vector3
 ): Promise<void> {
     return new Promise((resolve) => {
         const positionAnimation = new BABYLON.Animation(

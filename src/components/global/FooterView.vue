@@ -6,10 +6,37 @@ const store = useSocialStore()
 
 const currentYear = computed(() => new Date().getFullYear())
 
-const openSocialLink = (link: string) => {
+const openSocialLink = (link: string): void => {
     window.open(link, '_blank', 'noopener,noreferrer')
 }
 </script>
+
+<template>
+    <v-footer color="background" class="footer">
+        <div class="social-links">
+            <v-tooltip
+                v-for="link in store.socialLinks"
+                :key="link.id"
+                :text="link.label"
+                location="top"
+            >
+                <template #activator="{ props }">
+                    <v-btn
+                        v-bind="props"
+                        variant="text"
+                        :icon="link.logo"
+                        size="x-large"
+                        class="social-button"
+                        @click.stop="openSocialLink(link.link)"
+                    />
+                </template>
+            </v-tooltip>
+        </div>
+        <div class="copyright">
+            Copyright© {{ currentYear }} — <strong>ssk-tmysのポートフォリオ</strong>
+        </div>
+    </v-footer>
+</template>
 
 <style scoped>
 .footer {
@@ -55,29 +82,3 @@ const openSocialLink = (link: string) => {
     }
 }
 </style>
-<template>
-    <v-footer color="background" class="footer">
-        <div class="social-links">
-            <v-tooltip
-                v-for="link in store.socialLinks"
-                :key="link.id"
-                :text="link.label"
-                location="top"
-            >
-                <template v-slot:activator="{ props }">
-                    <v-btn
-                        v-bind="props"
-                        variant="text"
-                        :icon="link.logo"
-                        size="x-large"
-                        class="social-button"
-                        @click.stop="openSocialLink(link.link)"
-                    />
-                </template>
-            </v-tooltip>
-        </div>
-        <div class="copyright">
-            Copyright© {{ currentYear }} — <strong>ssk-tmysのポートフォリオ</strong>
-        </div>
-    </v-footer>
-</template>

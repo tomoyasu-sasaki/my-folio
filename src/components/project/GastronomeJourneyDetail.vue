@@ -3,21 +3,85 @@ import { computed } from 'vue'
 import { useLanguageStore } from '../../stores/language'
 import type { Project } from '../../stores/project'
 
+// 機能アイコンの型定義
+type FeatureKey = `feature-${1 | 2 | 3 | 4}`
+type FeatureIconMap = {
+  readonly [K in FeatureKey]: string
+}
+
 const props = defineProps<{
   project: Project
 }>()
 
 const languageStore = useLanguageStore()
 
+// 画像パスの設定
+const imageConfig = {
+  hero: '/my-folio/img/Project/GastronomeJourney/gastronome-hero.jpg',
+  architecture: '/my-folio/img/Project/gastronome-architecture.png',
+  dataFlow: '/my-folio/img/Project/gastronome-data-flow.png',
+  mockupBase: '/my-folio/img/Project/GastronomeJourney/mockup'
+} as const
+
 // モックアップ画像の数を取得
-const mockupCount = computed(() => props.project?.details?.mockupCount || 5)
+const mockupCount = computed(() => {
+  const count = props.project?.details?.mockupCount
+  return typeof count === 'number' ? count : 5
+})
 
 // 機能アイコンマッピング
-const featureIcons = {
+const featureIcons: FeatureIconMap = {
   'feature-1': 'mdi-store',
   'feature-2': 'mdi-image-multiple',
   'feature-3': 'mdi-eye-settings',
   'feature-4': 'mdi-magnify'
+} as const
+
+// リンクを開く関数
+function openExternalLink(url: string): void {
+  if (typeof window !== 'undefined') {
+    window.open(url, '_blank')
+  }
+}
+
+// モックアップ画像のパスを生成する関数
+function getMockupImagePath(index: number): string {
+  return `${imageConfig.mockupBase}-${props.project.id}-${index}.png`
+}
+
+// 基本情報の翻訳を取得する関数
+function getBasicInfo(key: string): string {
+  return languageStore.t('projectDetail', 'basicInfo', key, 'text')
+}
+
+// ボタンの翻訳を取得する関数
+function getButton(key: string): string {
+  return languageStore.t('projectDetail', 'buttons', key, 'text')
+}
+
+// セクションタイトルの翻訳を取得する関数
+function getSectionTitle(key: string): string {
+  return languageStore.t('projectDetail', 'sections', key, 'text')
+}
+
+// 機能の翻訳を取得する関数
+function getFeature(key: string, subKey: string): string {
+  return languageStore.t('projectDetail', 'feature', key, subKey)
+}
+
+// スクリーンの翻訳を取得する関数
+function getScreen(key: string): string {
+  return languageStore.t('projectDetail', 'screen', key, 'text')
+}
+
+// プロジェクトタイプの翻訳を取得する関数
+function getType(key: string): string {
+  return languageStore.t('projectDetail', 'type', key, 'text')
+}
+
+// カスタムコンテンツの翻訳を取得する関数
+function getCustomContent(key: string): string {
+  return languageStore.t('projectDetail', 'customContent', key, 'text')
 }
 </script>
 
@@ -26,7 +90,7 @@ const featureIcons = {
     <!-- ヒーローセクション -->
     <div class="hero-section mb-12">
       <v-parallax
-        :src="`/my-folio/img/Project/GastronomeJourney/gastronome-hero.jpg`"
+        :src="imageConfig.hero"
         height="400"
         class="rounded-xl"
       >
@@ -39,9 +103,9 @@ const featureIcons = {
             size="large"
             class="mt-6"
             prepend-icon="mdi-play-circle"
-            @click="window.open(project.details.demoUrl, '_blank')"
+            @click="openExternalLink(project.details.demoUrl)"
           >
-            {{ languageStore.t('projectDetail', 'demoButton') }}
+            {{ getButton('demoButton') }}
           </v-btn>
         </div>
       </v-parallax>
@@ -50,8 +114,8 @@ const featureIcons = {
     <!-- アプリ概要 -->
     <v-row>
       <v-col cols="12" md="7">
-        <h2 class="text-h4 mb-4">{{ languageStore.t('projectDetail', 'description') }}</h2>
-        <v-card elevation="2" class="pa-6 mb-8">
+        <h2 class="text-h4 mb-4">{{ getBasicInfo('description') }}</h2>
+        <v-card class="pa-6 mb-8" variant="outlined">
           <p class="text-body-1">{{ project.description }}</p>
           <div class="mt-4 d-flex flex-wrap">
             <v-chip
@@ -68,18 +132,19 @@ const featureIcons = {
         </v-card>
 
         <!-- 主要機能セクション -->
-        <h2 class="text-h4 mt-8 mb-6">{{ languageStore.t('projectDetail', 'sectionTitles', undefined, 'core-features') }}</h2>
+        <h2 class="text-h4 mt-8 mb-6">{{ getBasicInfo('features') }}</h2>
         <v-row>
           <v-col v-for="i in 4" :key="i" cols="12" sm="6">
             <v-card height="100%" class="feature-card" variant="outlined">
               <v-card-title class="d-flex align-center">
-                <v-icon :icon="featureIcons[`feature-${i}`] || 'mdi-check-circle'" 
+                <v-icon
+                :icon="featureIcons[`feature-${i}` as FeatureKey] || 'mdi-check-circle'" 
                   color="primary" size="large" class="mr-3"></v-icon>
-                {{ languageStore.t('projectDetail', 'feature', undefined, `${project.id}-${i}`) }}
+                {{ getFeature(`${project.id}-${i}`, 'text') }}
               </v-card-title>
               <v-card-text>
                 <p class="text-body-2">
-                  居酒屋管理アプリならではの{{ languageStore.t('projectDetail', 'feature', undefined, `${project.id}-${i}`) }}機能について説明します。
+                  {{ getFeature(`${project.id}-${i}`, 'description') }}
                 </p>
               </v-card-text>
             </v-card>
@@ -87,17 +152,17 @@ const featureIcons = {
         </v-row>
 
         <!-- アーキテクチャ説明 -->
-        <h2 class="text-h4 mt-8 mb-4">{{ languageStore.t('projectDetail', 'sectionTitles', undefined, 'architecture') }}</h2>
-        <v-card elevation="0" class="pa-0 mb-6 rounded-xl architecture-card">
+        <h2 class="text-h4 mt-8 mb-4">{{ getSectionTitle('architecture') }}</h2>
+        <v-card elevation="0" class="pa-0 mb-6 architecture-card" variant="outlined">
           <v-img
-            :src="`/my-folio/img/Project/gastronome-architecture.png`"
+            :src="imageConfig.architecture"
             height="300"
             class="rounded-t-xl"
             cover
           ></v-img>
-          <v-card-text class="pa-6 bg-grey-lighten-4 rounded-b-xl">
+          <v-card-text class="pa-6 rounded-b-xl">
             <p class="text-body-1">
-              {{ languageStore.t('projectDetail', 'customContent', undefined, 'architecture-description') }}
+              {{ getCustomContent('architecture-description') }}
             </p>
           </v-card-text>
         </v-card>
@@ -105,8 +170,8 @@ const featureIcons = {
 
       <v-col cols="12" md="5">
         <!-- モックアップショーケース -->
-        <v-card elevation="2" class="pa-4 mb-6">
-          <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'mockups') }}</h3>
+        <v-card class="pa-4 mb-6" variant="outlined">
+          <h3 class="text-h5 mb-4">{{ getBasicInfo('mockups') }}</h3>
           <v-carousel
             height="500"
             hide-delimiters
@@ -122,12 +187,12 @@ const featureIcons = {
               <v-img
                 height="100%"
                 class="rounded"
-                :src="`/my-folio/img/Project/GastronomeJourney/mockup-${project.id}-${n}.png`"
+                :src="getMockupImagePath(n)"
                 gradient="to bottom, rgba(0,0,0,0) 70%, rgba(0,0,0,0.7) 100%"
               >
                 <div class="d-flex justify-center align-end fill-height pb-6">
                   <v-chip color="primary" size="large">
-                    {{ languageStore.t('projectDetail', 'screen', undefined, `${project.id}-${n}`) }}
+                    {{ getScreen(`${project.id}-${n}`) }}
                   </v-chip>
                 </div>
               </v-img>
@@ -136,28 +201,28 @@ const featureIcons = {
         </v-card>
         
         <!-- プロジェクト情報 -->
-        <v-card elevation="2" class="pa-4 mb-6">
-          <h3 class="text-h5 mb-4">{{ languageStore.t('projectDetail', 'overview') }}</h3>
+        <v-card class="pa-4 mb-6" variant="outlined">
+          <h3 class="text-h5 mb-4">{{ getBasicInfo('overview') }}</h3>
           
           <v-list density="compact" class="bg-transparent">
             <v-list-item>
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary">mdi-code-tags</v-icon>
               </template>
-              <v-list-item-title>{{ languageStore.t('projectDetail', 'language') }}</v-list-item-title>
+              <v-list-item-title>{{ getBasicInfo('language') }}</v-list-item-title>
               <v-list-item-subtitle>{{ project.language }}</v-list-item-subtitle>
             </v-list-item>
             
             <v-list-item>
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary">mdi-application</v-icon>
               </template>
-              <v-list-item-title>{{ languageStore.t('projectDetail', 'projectType') }}</v-list-item-title>
-              <v-list-item-subtitle>{{ languageStore.t('projectDetail', 'type', undefined, project.id) }}</v-list-item-subtitle>
+              <v-list-item-title>{{ getBasicInfo('projectType') }}</v-list-item-title>
+              <v-list-item-subtitle>{{ getType(project.id) }}</v-list-item-subtitle>
             </v-list-item>
             
             <v-list-item v-if="project.details?.githubRepo">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary">mdi-github</v-icon>
               </template>
               <v-list-item-title>GitHub</v-list-item-title>
@@ -167,15 +232,15 @@ const featureIcons = {
                   variant="text" 
                   color="primary" 
                   density="compact"
-                  @click="window.open(project.details.githubRepo, '_blank')"
+                  @click="openExternalLink(project.details.githubRepo)"
                 >
-                  {{ languageStore.t('projectDetail', 'githubButton') }}
+                  {{ getButton('githubButton') }}
                 </v-btn>
               </v-list-item-subtitle>
             </v-list-item>
             
             <v-list-item v-if="project.details?.demoUrl">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary">mdi-web</v-icon>
               </template>
               <v-list-item-title>デモ</v-list-item-title>
@@ -185,9 +250,9 @@ const featureIcons = {
                   variant="text" 
                   color="primary" 
                   density="compact"
-                  @click="window.open(project.details.demoUrl, '_blank')"
+                  @click="openExternalLink(project.details.demoUrl)"
                 >
-                  {{ languageStore.t('projectDetail', 'demoButton') }}
+                  {{ getButton('demoButton') }}
                 </v-btn>
               </v-list-item-subtitle>
             </v-list-item>
@@ -195,10 +260,10 @@ const featureIcons = {
         </v-card>
         
         <!-- 関連データフロー -->
-        <v-card elevation="2" class="pa-4">
+        <v-card class="pa-4" variant="outlined">
           <h3 class="text-h5 mb-4">データフロー</h3>
           <v-img
-            :src="`/my-folio/img/Project/gastronome-data-flow.png`"
+            :src="imageConfig.dataFlow"
             height="250"
             class="rounded mb-3"
             cover
