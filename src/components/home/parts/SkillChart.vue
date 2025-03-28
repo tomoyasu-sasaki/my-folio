@@ -1,34 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Skill } from '../../../stores/skill'
-import { useLanguageStore } from '../../../stores/language'
-import type { SectionName } from '../../../locales/types'
 import type { ApexOptions } from 'apexcharts'
-
-// プロップスの型定義
-interface Props {
-    readonly title: string
-    readonly skills: readonly Skill[]
-}
-
-// レイアウト設定の型定義
-interface LayoutConfig {
-    readonly chart: {
-        readonly height: number
-        readonly fontSize: {
-            readonly title: string
-            readonly labels: string
-        }
-        readonly columnWidth: string
-        readonly borderRadius: number
-    }
-    readonly card: {
-        readonly padding: number
-        readonly margin: {
-            readonly y: number
-        }
-    }
-}
+import { useTranslation } from '../../../composables/useTranslation'
+import type { SectionName } from '../../../locales/types'
 
 // チャートのデータシリーズの型定義
 interface ChartSeries {
@@ -37,17 +11,27 @@ interface ChartSeries {
     readonly color: string
 }
 
+// プロップスの型定義
+interface Props {
+    readonly title: string
+    readonly skills: Array<{
+        name: string
+        level: number
+        likes: number
+    }>
+}
+
 const props = defineProps<Props>()
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // 評価基準の翻訳を取得する関数
 const getEvaluationTranslation = (key: string): string => {
     const section: SectionName = 'skill'
-    return languageStore.t(section, 'evaluation', key, 'text')
+    return t({ section, key: 'evaluation', subKey: key, itemId: 'text' })
 }
 
 // レイアウト設定
-const layoutConfig: LayoutConfig = {
+const layoutConfig = {
     chart: {
         height: 350,
         fontSize: {
@@ -55,7 +39,11 @@ const layoutConfig: LayoutConfig = {
             labels: '12px'
         },
         columnWidth: '55%',
-        borderRadius: 4
+        borderRadius: 4,
+        padding: {
+            top: 20,
+            bottom: 20
+        }
     },
     card: {
         padding: 4,
@@ -65,13 +53,13 @@ const layoutConfig: LayoutConfig = {
     }
 } as const
 
-// チャートの設定
-const chartOptions = computed<ApexOptions>(() => ({
+// 基本的なチャートオプションをメモ化
+const baseChartOptions = computed<Partial<ApexOptions>>(() => ({
     chart: {
+        type: 'bar',
         toolbar: {
             show: false
         },
-        type: 'bar',
         fontFamily: 'Roboto, sans-serif',
         background: 'transparent'
     },
@@ -82,21 +70,8 @@ const chartOptions = computed<ApexOptions>(() => ({
             borderRadius: layoutConfig.chart.borderRadius
         }
     },
-    xaxis: {
-        categories: props.skills.map((skill) => skill.name),
-        labels: {
-            style: {
-                fontSize: layoutConfig.chart.fontSize.labels
-            }
-        }
-    },
-    title: {
-        text: props.title,
-        align: 'center',
-        style: {
-            fontSize: layoutConfig.chart.fontSize.title,
-            fontWeight: 'bold'
-        }
+    stroke: {
+        width: 2
     },
     markers: {
         size: 3,
@@ -108,6 +83,30 @@ const chartOptions = computed<ApexOptions>(() => ({
             formatter: (val: number): string => `${val}%`
         },
         theme: 'dark'
+    }
+}))
+
+// チャートのラベルとカテゴリーをメモ化
+const chartCategories = computed(() => {
+    return props.skills.map(skill => skill.name)
+})
+
+// チャートのデータをメモ化
+const chartData = computed(() => ({
+    experience: props.skills.map(skill => skill.level),
+    preference: props.skills.map(skill => Math.max(0, skill.likes))
+}))
+
+// 最終的なチャートオプションをメモ化
+const chartOptions = computed<ApexOptions>(() => ({
+    ...baseChartOptions.value,
+    xaxis: {
+        categories: chartCategories.value,
+        labels: {
+            style: {
+                fontSize: layoutConfig.chart.fontSize.labels
+            }
+        }
     },
     yaxis: {
         min: 0,
@@ -115,6 +114,14 @@ const chartOptions = computed<ApexOptions>(() => ({
         tickAmount: 4,
         labels: {
             formatter: (val: number): string => `${val}%`
+        }
+    },
+    title: {
+        text: props.title,
+        align: 'center',
+        style: {
+            fontSize: layoutConfig.chart.fontSize.title,
+            fontWeight: 'bold'
         }
     },
     legend: {
@@ -127,16 +134,16 @@ const chartOptions = computed<ApexOptions>(() => ({
     }
 }))
 
-// チャートのデータシリーズ
+// チャートシリーズをメモ化
 const chartSeries = computed<readonly ChartSeries[]>(() => [
     {
         name: getEvaluationTranslation('experience'),
-        data: props.skills.map((skill) => skill.level),
+        data: chartData.value.experience,
         color: '#2196F3'
     },
     {
         name: getEvaluationTranslation('preference'),
-        data: props.skills.map((skill) => Math.max(0, skill.likes)),
+        data: chartData.value.preference,
         color: '#4CAF50'
     }
 ] as const)
@@ -144,6 +151,7 @@ const chartSeries = computed<readonly ChartSeries[]>(() => [
 
 <template>
     <v-card 
+        class="skill-chart"
         :class="`pa-${layoutConfig.card.padding} my-${layoutConfig.card.margin.y}`" 
         elevation="2" 
         style="background-color: transparent !important"
@@ -162,4 +170,8 @@ const chartSeries = computed<readonly ChartSeries[]>(() => [
 </template>
 
 <style scoped>
+.skill-chart {
+    width: 100%;
+    height: 100%;
+}
 </style>

@@ -1,17 +1,7 @@
 <script setup lang="ts">
 import SkillChart from '../parts/SkillChart.vue'
-import { useSkillStore } from '../../../stores/skill'
-import type { SkillCategory, Skill } from '../../../stores/skill'
-import { useLanguageStore } from '../../../stores/language'
-import type { SectionName } from '../../../locales/types'
-import { computed } from 'vue'
-
-// カテゴリースキルの型定義
-interface CategorySkill {
-    readonly category: SkillCategory
-    readonly title: string
-    readonly skills: Skill[]
-}
+import { useSkillData } from '../../../composables/useSkillData'
+import { onMounted } from 'vue'
 
 // レイアウト設定の型定義
 interface LayoutConfig {
@@ -32,17 +22,7 @@ interface LayoutConfig {
     }
 }
 
-const skillStore = useSkillStore()
-const languageStore = useLanguageStore()
-
-// カテゴリー名の翻訳を取得する関数
-const getCategoryTranslation = (category: SkillCategory): string => {
-    const section: SectionName = 'skill'
-    return languageStore.t(section, 'categories', 'names', category)
-}
-
-// カテゴリーの定義
-const categories: readonly SkillCategory[] = ['frontend', 'backend', 'database', 'infrastructure'] as const
+const { initialize, categorySkills } = useSkillData()
 
 // レイアウト設定
 const layoutConfig: LayoutConfig = {
@@ -63,22 +43,17 @@ const layoutConfig: LayoutConfig = {
     }
 } as const
 
-// カテゴリーごとのスキルデータを計算
-const categorySkills = computed<CategorySkill[]>(() => 
-    categories.map(category => ({
-        category,
-        title: getCategoryTranslation(category),
-        skills: skillStore.getSkillsByCategory(category)
-    }))
-)
+onMounted(() => {
+    initialize()
+})
 </script>
 
 <template>
     <v-container id="skillContainer" class="padding">
         <v-row>
             <v-col
-                v-for="{ category, title, skills } in categorySkills"
-                :key="category"
+                v-for="{ categoryId, title, skills } in categorySkills"
+                :key="categoryId"
                 :cols="layoutConfig.breakpoints.cols"
                 :md="layoutConfig.breakpoints.md"
                 class="skill-category"

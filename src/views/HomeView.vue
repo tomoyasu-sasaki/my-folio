@@ -10,13 +10,14 @@ import CarrerSection from '../components/home/section/CarrerSection.vue'
 
 import { onMounted, onUnmounted, reactive } from 'vue'
 import { useScrollStore } from '../stores/scroll'
-import { useLanguageStore } from '../stores/language'
+import { useTranslation } from '../composables/useTranslation'
+import type { SectionName } from '../locales/types'
 import { useRouter } from 'vue-router'
 import { logger } from '../utils/logger'
 
 const router = useRouter()
 const store = useScrollStore()
-const languageStore = useLanguageStore()
+const { t } = useTranslation()
 
 // マウス位置トラッキング用の状態
 const mousePos = reactive({ x: 0, y: 0 })
@@ -43,7 +44,8 @@ const sections = [
 
 // 翻訳されたセクションタイトルを取得する関数
 const getSectionTitle = (sectionId: string): string => {
-    return languageStore.t('navigation', sectionId, 'text')
+    const section: SectionName = 'navigation'
+    return t({ section, key: sectionId, subKey: 'text' })
 }
 
 // Intersection Observerのコールバック

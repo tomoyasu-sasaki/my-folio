@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useScrollStore } from '../../../stores/scroll'
 import { useNavigationStore } from '../../../stores/navigation'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import { computed } from 'vue'
 
 const scrollStore = useScrollStore()
 const navStore = useNavigationStore()
-const languageStore = useLanguageStore()
+const { t, toggleLanguage } = useTranslation()
 
 const isScrolled = computed(() => window.scrollY > 0)
 </script>
@@ -34,7 +34,7 @@ const isScrolled = computed(() => window.scrollY > 0)
                         :class="{ 'active-section': scrollStore.activeSection === section.id }"
                         @click="scrollStore.scrollToSection(section.id)"
                     >
-                        {{ languageStore.t('navigation', section.id, 'text') }}
+                        {{ t({ section: 'navigation', key: section.id, subKey: 'text' }) }}
                     </v-btn>
                 </v-col>
 
@@ -42,10 +42,10 @@ const isScrolled = computed(() => window.scrollY > 0)
                     <v-btn
                         variant="text"
                         class="language-toggle-btn"
-                        @click="languageStore.toggleLanguage"
+                        @click="toggleLanguage"
                     >
                         <v-icon icon="mdi-translate" class="mr-1" />
-                        {{ languageStore.t('languageSwitch', 'button', 'switchToOther') }}
+                        {{ t({ section: 'languageSwitch', key: 'button', subKey: 'switchToOther' }) }}
                     </v-btn>
 
                     <v-btn
@@ -80,16 +80,16 @@ const isScrolled = computed(() => window.scrollY > 0)
                     navStore.closeMobileMenu();
                 }"
             >
-                {{ languageStore.t('navigation', section.id, 'text') }}
+                {{ t({ section: 'navigation', key: section.id, subKey: 'text' }) }}
             </v-list-item>
 
             <v-divider class="my-2" />
 
-            <v-list-item @click="languageStore.toggleLanguage">
+            <v-list-item @click="toggleLanguage">
                 <template #prepend>
                     <v-icon icon="mdi-translate" />
                 </template>
-                {{ languageStore.t('languageSwitch', 'button', 'switchToOther') }}
+                {{ t({ section: 'languageSwitch', key: 'button', subKey: 'switchToOther' }) }}
             </v-list-item>
 
             <v-list-item

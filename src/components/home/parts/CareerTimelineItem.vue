@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { CareerItem } from '../../../stores/career'
-import { useLanguageStore } from '../../../stores/language'
+import type { CareerItemWithTranslation } from '../../../composables/useCareerData'
+import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
 
 // プロップスの型定義
 interface Props {
-    readonly item: CareerItem
+    readonly item: CareerItemWithTranslation
 }
 
 // 日付フォーマット関連の型定義
@@ -46,7 +46,7 @@ interface LayoutConfig {
 }
 
 const props = defineProps<Props>()
-const languageStore = useLanguageStore()
+const { t, currentLanguage } = useTranslation()
 
 // レイアウト設定
 const layoutConfig: LayoutConfig = {
@@ -84,7 +84,7 @@ const layoutConfig: LayoutConfig = {
 // 日付関連の翻訳を取得する関数
 const getDateTranslation = (key: 'year' | 'month'): string => {
     const section: SectionName = 'career'
-    return languageStore.t(section, 'date', key, 'text')
+    return t({ section, key: 'date', subKey: key, itemId: 'text' })
 }
 
 // 月名の配列
@@ -95,9 +95,8 @@ const monthNames: readonly MonthName[] = [
 
 const formatDate = (date: string): string => {
     const [year, month] = date.split('/') as DateParts
-    const lang = languageStore.currentLanguage
     
-    if (lang === 'ja') {
+    if (currentLanguage.value === 'ja') {
         return `${year}${getDateTranslation('year')}${month}${getDateTranslation('month')}`
     } else {
         const monthIndex = parseInt(month) - 1

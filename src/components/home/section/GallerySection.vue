@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useGalleryStore } from '../../../stores/gallery'
-import { useLanguageStore } from '../../../stores/language'
-import type { GalleryItem } from '../../../stores/gallery'
+import { useGalleryData } from '../../../composables/useGalleryData'
+import { useTranslation } from '../../../composables/useTranslation'
+import type { GalleryItemWithTranslation } from '../../../composables/useGalleryData'
 import type { SectionName } from '../../../locales/types'
 import GalleryCard from '../parts/GalleryCard.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
 // 表示モードの型定義
 type DisplayMode = 'grid' | 'carousel'
@@ -48,40 +48,53 @@ interface Translations {
     readonly description: string
 }
 
-const galleryStore = useGalleryStore()
-const languageStore = useLanguageStore()
+const { initialize, allItems } = useGalleryData()
+const { t } = useTranslation()
 
 // セクション情報の翻訳を取得する関数
 const getSectionTranslation = (key: string): string => {
     const section: SectionName = 'galleryData'
-    return languageStore.t(section, 'section', key)
+    return t({ section, key: 'section', subKey: key })
 }
 
 // フィルター関連の翻訳を取得する関数
 const getFilterTranslation = (key: string): string => {
     const section: SectionName = 'gallery'
-    return languageStore.t(section, 'filter', key, 'text')
+    return t({ section, key: 'filter', subKey: key, itemId: 'text' })
 }
 
-const items = computed<GalleryItem[]>(() => galleryStore.getAllItems)
+const items = computed<GalleryItemWithTranslation[]>(() => allItems.value)
+
+// 月別のアイテムをメモ化
+const itemsByMonth = computed(() => {
+    const monthMap = new Map<string, GalleryItemWithTranslation[]>()
+    items.value.forEach(item => {
+        const month = item.createdAt.substring(0, 7)
+        const monthItems = monthMap.get(month) || []
+        monthItems.push(item)
+        monthMap.set(month, monthItems)
+    })
+    return monthMap
+})
+
+// ユニークな月のリストをメモ化
+const uniqueMonths = computed<string[]>(() => {
+    return Array.from(itemsByMonth.value.keys()).sort().reverse()
+})
+
+// フィルタリングされたアイテムをメモ化
+const filteredItems = computed<GalleryItemWithTranslation[]>(() => {
+    if (!selectedMonth.value) {
+        return items.value
+    }
+    return itemsByMonth.value.get(selectedMonth.value) || []
+})
 
 // 表示モード
 const displayMode = ref<DisplayMode>('grid')
 
-// 月別フィルター用の一意な月リスト
-const uniqueMonths = computed<string[]>(() => {
-    const months = new Set(items.value.map((item) => item.createdAt))
-    return Array.from(months).sort().reverse()
-})
-
 // 選択された月
 const selectedMonth = ref<string | null>(null)
-
-// フィルター適用後のアイテム
-const filteredItems = computed<GalleryItem[]>(() => {
-    if (!selectedMonth.value) return items.value
-    return galleryStore.getItemsByMonth(selectedMonth.value)
-})
 
 // レイアウト設定
 const layoutConfig: LayoutConfig = {
@@ -121,6 +134,10 @@ const translations = computed<Translations>(() => ({
     title: getSectionTranslation('text'),
     description: getSectionTranslation('description')
 }))
+
+onMounted(() => {
+    initialize()
+})
 </script>
 
 <template>

@@ -50,6 +50,7 @@ export const skillTranslations: TranslationDict<SkillTranslation> = {
         frontend: 'フロントエンド',
         backend: 'バックエンド',
         infrastructure: 'インフラストラクチャ',
+        database: 'データベース',
         design: 'デザイン',
         management: 'プロジェクト管理',
         other: 'その他'
@@ -80,6 +81,7 @@ export const skillTranslations: TranslationDict<SkillTranslation> = {
         frontend: 'Frontend',
         backend: 'Backend',
         infrastructure: 'Infrastructure',
+        database: 'Database',
         design: 'Design',
         management: 'Project Management',
         other: 'Others'
