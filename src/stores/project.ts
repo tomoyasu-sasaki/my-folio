@@ -28,6 +28,7 @@ export interface Project {
         githubRepo?: string
         hasDemo?: boolean
         demoUrl?: string
+        officialUrl?: string
         additionalImages?: string[]
         customComponent?: string
     }
@@ -77,13 +78,14 @@ export const useProjectStore = defineStore({
                     'GastronomeJourney.png',
                     '',
                     ['Flutter', 'Firebase', 'Dart'],
-                    'end',
+                    'completed',
                     {
                         layout: 'gallery',
                         mockupCount: 13,
                         githubRepo: 'https://github.com/tomoyasu-sasaki/GastronomeJourney',
-                        hasDemo: true,
+                        hasDemo: false,
                         demoUrl: 'https://gastronomejourney.apps',
+                        officialUrl: 'https://gastronome-journey.vercel.app/',
                         sections: [
                             {
                                 type: 'feature-list',

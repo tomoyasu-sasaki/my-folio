@@ -2,17 +2,14 @@
 import type { ProjectWithTranslation } from '../../../composables/useProjectData'
 import { useTranslation } from '../../../composables/useTranslation'
 import type { SectionName } from '../../../locales/types'
-import { useRouter } from 'vue-router'
 import { computed } from 'vue'
-
-const router = useRouter()
-
+import { useRouter } from 'vue-router'
 interface Props {
     project: ProjectWithTranslation
 }
 
 const props = defineProps<Props>()
-
+const router = useRouter()
 const { t } = useTranslation()
 
 // ステータスカラーの型定義
@@ -36,8 +33,8 @@ const getTranslation = (category: string, key: string): string => {
 // プロジェクトの画像パスを計算
 const imagePath = computed(() => `/my-folio/img/Project/${props.project.image}`)
 
-// 詳細ページへの遷移関数
 function navigateToDetail(project: ProjectWithTranslation): void {
+    if (project.status === 'end') return
     if (project.url) {
         window.open(project.url, '_blank')
     } else {
@@ -47,7 +44,7 @@ function navigateToDetail(project: ProjectWithTranslation): void {
 </script>
 
 <template>
-    <v-card class="project-card" variant="outlined" @click="navigateToDetail(project)">
+    <v-card class="project-card" variant="outlined">
         <v-img :src="imagePath" height="200" cover>
             <template #placeholder>
                 <v-row class="fill-height" align="center" justify="center">
@@ -93,6 +90,17 @@ function navigateToDetail(project: ProjectWithTranslation): void {
                 </v-chip>
             </div>
         </v-card-text>
+
+        <v-card-actions>
+            <v-btn
+                prepend-icon="mdi-open-in-new"
+                variant="outlined"
+                :disabled="project.status === 'end'"
+                @click="navigateToDetail(project)"
+            >
+                {{ getTranslation('action', 'details') }}
+            </v-btn>
+        </v-card-actions>
     </v-card>
 </template>
 
@@ -100,11 +108,14 @@ function navigateToDetail(project: ProjectWithTranslation): void {
 .project-card {
     height: 100%;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
 }
 
 .project-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-card-actions {
+    padding: 16px;
 }
 </style> 

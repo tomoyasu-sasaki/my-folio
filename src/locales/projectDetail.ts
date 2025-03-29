@@ -91,6 +91,8 @@ interface ProjectDetailButtonTranslation {
   githubButton: BaseTranslationItem;
   /** ダウンロードボタン */
   downloadButton: BaseTranslationItem;
+  /** 公式サイトボタン */
+  officialButton: BaseTranslationItem;
 }
 
 /**
@@ -158,6 +160,10 @@ export const projectDetailTranslations: TranslationDict<ProjectDetailTranslation
       demoButton: {
         text: 'デモを見る',
         description: 'デモページを開く'
+      },
+      officialButton: {
+        text: '公式サイト',
+        description: '公式サイトを開く'
       },
       githubButton: {
         text: 'GitHubで見る',
@@ -432,6 +438,10 @@ export const projectDetailTranslations: TranslationDict<ProjectDetailTranslation
       demoButton: {
         text: 'View Demo',
         description: 'Open demo page'
+      },
+      officialButton: {
+        text: 'Official Site',
+        description: 'Open official site'
       },
       githubButton: {
         text: 'View on GitHub',

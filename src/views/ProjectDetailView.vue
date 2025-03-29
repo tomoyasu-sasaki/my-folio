@@ -167,13 +167,13 @@ const getTestimonial = (key: string): string => {
             </v-btn>
             
             <v-btn 
-              v-if="project && project.details?.demoUrl" 
+              v-if="project && project.details?.officialUrl" 
               color="info" 
               class="mr-2"
               prepend-icon="mdi-play-circle"
-              @click="() => openUrl(project?.details?.demoUrl)"
+              @click="() => openUrl(project?.details?.officialUrl)"
             >
-              {{ getButton('demoButton') }}
+              {{ getButton('officialButton') }}
             </v-btn>
 
             <v-btn 

@@ -61,6 +61,11 @@ export const useNormalizedSkillStore = defineStore('normalizedSkill', {
   actions: {
     // ストアの初期化
     initialize() {
+      // 既に初期化済みの場合は何もしない
+      if (this.categoryIds.length > 0) {
+        return
+      }
+
       // カテゴリーの初期化
       const categories: SkillCategory[] = ['frontend', 'backend', 'database', 'infrastructure']
       categories.forEach((key, index) => {

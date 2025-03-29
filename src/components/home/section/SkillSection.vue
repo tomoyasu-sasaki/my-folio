@@ -43,8 +43,14 @@ const layoutConfig: LayoutConfig = {
     }
 } as const
 
+// 初期化フラグ
+let isInitialized = false
+
 onMounted(() => {
-    initialize()
+    if (!isInitialized) {
+        initialize()
+        isInitialized = true
+    }
 })
 </script>
 

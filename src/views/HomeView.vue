@@ -34,9 +34,9 @@ const animatedSections = reactive<AnimatedSections>({})
 
 // セクション定義
 const sections = [
-  { id: 'about', component: AboutSection, bgClass: '' },
-  { id: 'project', component: ProjectSection, bgClass: 'bg-gradient-1' },
-  { id: 'skill', component: SkillSection, bgClass: 'bg-gradient-2' },
+  { id: 'about', component: AboutSection, bgClass: 'bg-gradient-1' },
+  { id: 'project', component: ProjectSection, bgClass: 'bg-gradient-2' },
+  { id: 'skill', component: SkillSection, bgClass: 'bg-gradient-3' },
 //   { id: 'blog', component: BlogSection, bgClass: 'bg-gradient-3' },
   { id: 'gallery', component: GallerySection, bgClass: 'bg-gradient-4' },
   { id: 'career', component: CarrerSection, bgClass: 'bg-gradient-5' }
@@ -136,14 +136,32 @@ onUnmounted(() => {
             :id="id"
             :key="id" 
             :class="[
-                bgClass, 
                 'section-container',
                 { 'animated-in': animatedSections[id] }
             ]"
             :data-section-id="id"
         >
-            <h2 class="text-h4 text-center mb-8">{{ getSectionTitle(id) }}</h2>
-            <component :is="component" />
+            <div 
+                v-if="bgClass"
+                :class="[bgClass, 'section-header']"
+                :style="{
+                    '--mouse-x': `${mousePos.x}px`,
+                    '--mouse-y': `${mousePos.y}px`
+                }"
+            >
+                <div class="interactive-particle"></div>
+                <div class="interactive-particle"></div>
+                <div class="interactive-particle"></div>
+                
+                <h1 class="sec-title" :class="{ 'title-animated': animatedSections[id] }">
+                    <span v-for="(char, index) in getSectionTitle(id)" :key="index" :style="`--char-index: ${index}`">
+                        {{ char }}
+                    </span>
+                </h1>
+            </div>
+            <div class="section-content">
+                <component :is="component" />
+            </div>
         </div>
     </main>
     <Footer />
@@ -156,12 +174,16 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s ease, transform 0.8s ease;
-    padding: 2rem 0;
 }
 
 .section-container.animated-in {
     opacity: 1;
     transform: translateY(0);
+}
+
+.section-content {
+    
+    padding: 2rem 0;
 }
 
 .section-header {
@@ -176,6 +198,20 @@ onUnmounted(() => {
 
 .section-header:hover {
     height: 420px;
+}
+
+.section-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="none" width="100" height="100"/><rect fill-opacity="0.05" x="0" y="0" width="50" height="50"/><rect fill-opacity="0.05" x="50" y="50" width="50" height="50"/></svg>');
+    background-size: 40px 40px;
+    opacity: 0.3;
+    z-index: 1;
+    animation: backgroundScroll 30s linear infinite;
 }
 
 .sec-title {
@@ -207,38 +243,23 @@ onUnmounted(() => {
 
 /* モダンなグラデーション背景 */
 .bg-gradient-1 {
-    background: linear-gradient(to bottom right, var(--v-theme-primary), var(--v-theme-secondary));
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
 }
 
 .bg-gradient-2 {
-    background: linear-gradient(to bottom right, var(--v-theme-secondary), var(--v-theme-info));
+    background: linear-gradient(135deg, #10b981, #3b82f6);
 }
 
 .bg-gradient-3 {
-    background: linear-gradient(to bottom right, var(--v-theme-info), var(--v-theme-success));
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
 }
 
 .bg-gradient-4 {
-    background: linear-gradient(to bottom right, var(--v-theme-success), var(--v-theme-warning));
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
 }
 
 .bg-gradient-5 {
-    background: linear-gradient(to bottom right, var(--v-theme-warning), var(--v-theme-error));
-}
-
-/* 装飾エフェクト */
-.section-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="none" width="100" height="100"/><rect fill-opacity="0.05" x="0" y="0" width="50" height="50"/><rect fill-opacity="0.05" x="50" y="50" width="50" height="50"/></svg>');
-    background-size: 40px 40px;
-    opacity: 0.3;
-    z-index: 1;
-    animation: backgroundScroll 30s linear infinite;
+    background: linear-gradient(135deg, #14b8a6, #22c55e);
 }
 
 /* インタラクティブパーティクル */

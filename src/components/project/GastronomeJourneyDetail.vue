@@ -90,7 +90,7 @@ function getCustomContent(key: string): string {
 <template>
   <div class="gastronome-journey-detail">
     <!-- ヒーローセクション -->
-    <div class="hero-section mb-12">
+    <!-- <div class="hero-section mb-12">
       <v-parallax
         :src="imageConfig.hero"
         height="400"
@@ -100,18 +100,18 @@ function getCustomContent(key: string): string {
           <h1 class="text-h2 font-weight-bold text-white">{{ project.title }}</h1>
           <p class="text-h5 text-white mt-4">{{ project.subtitle }}</p>
           <v-btn 
-            v-if="project.details?.demoUrl" 
+            v-if="project.details?.officialUrl" 
             color="primary" 
             size="large"
             class="mt-6"
             prepend-icon="mdi-play-circle"
-            @click="openExternalLink(project.details.demoUrl)"
+            @click="openExternalLink(project.details.officialUrl)"
           >
-            {{ getButton('demoButton') }}
+            {{ getButton('officialButton') }}
           </v-btn>
         </div>
       </v-parallax>
-    </div>
+    </div> -->
 
     <!-- アプリ概要 -->
     <v-row>
@@ -204,8 +204,8 @@ function getCustomContent(key: string): string {
         
         <!-- プロジェクト情報 -->
         <v-card class="pa-4 mb-6" variant="outlined">
-          <h3 class="text-h5 mb-4">{{ getBasicInfo('info') }}</h3>
-          <v-list>
+          <h3 class="text-h5 mb-4">{{ getBasicInfo('techStack') }}</h3>
+          <v-list bg-color="transparent">
             <v-list-item>
               <template #prepend>
                 <v-icon color="primary">mdi-code-tags</v-icon>
@@ -218,9 +218,9 @@ function getCustomContent(key: string): string {
               <template #prepend>
                 <v-icon color="primary">mdi-flag</v-icon>
               </template>
-              <v-list-item-title>{{ getBasicInfo('status') }}</v-list-item-title>
+              <v-list-item-title>{{ getBasicInfo('projectType') }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ getType(project.status) }}
+                {{ getType(project.id) }}
               </v-list-item-subtitle>
             </v-list-item>
 
@@ -238,24 +238,6 @@ function getCustomContent(key: string): string {
                   @click="openExternalLink(project.details.githubRepo)"
                 >
                   {{ getButton('githubButton') }}
-                </v-btn>
-              </v-list-item-subtitle>
-            </v-list-item>
-
-            <v-list-item v-if="project.details?.demoUrl">
-              <template #prepend>
-                <v-icon color="primary">mdi-web</v-icon>
-              </template>
-              <v-list-item-title>デモ</v-list-item-title>
-              <v-list-item-subtitle>
-                <v-btn 
-                  size="small" 
-                  variant="text" 
-                  color="primary" 
-                  density="compact"
-                  @click="openExternalLink(project.details.demoUrl)"
-                >
-                  {{ getButton('demoButton') }}
                 </v-btn>
               </v-list-item-subtitle>
             </v-list-item>
