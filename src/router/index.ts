@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import BabylonFolioView from '../views/BabylonFolioView.vue'
+import ProjectDetailView from '../views/ProjectDetailView.vue'
 
-import { useAuthStore } from '../stores/auth'
+// import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,14 @@ const router = createRouter({
             path: '/babylonfolio',
             name: 'babylonfolio',
             component: BabylonFolioView,
+            meta: {
+                isCameFromQRcode: true
+            }
+        },
+        {
+            path: '/project/:id',
+            name: 'project-detail',
+            component: ProjectDetailView,
             meta: {
                 isCameFromQRcode: true
             }

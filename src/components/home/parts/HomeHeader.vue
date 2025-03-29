@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useScrollStore } from '../../../stores/scroll'
 import { useNavigationStore } from '../../../stores/navigation'
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
 import { computed } from 'vue'
 
 const scrollStore = useScrollStore()
 const navStore = useNavigationStore()
-const languageStore = useLanguageStore()
+const { t, toggleLanguage } = useTranslation()
 
 const isScrolled = computed(() => window.scrollY > 0)
 </script>
@@ -21,8 +21,8 @@ const isScrolled = computed(() => window.scrollY > 0)
             <v-row justify="space-between" align="center" no-gutters>
                 <v-col cols="auto" class="d-md-none">
                     <v-app-bar-nav-icon
-                        @click="navStore.toggleMobileMenu"
-                        :class="{ 'active': navStore.isMobileMenuOpen }"
+                    :class="{ 'active': navStore.isMobileMenuOpen }"
+                    @click="navStore.toggleMobileMenu"
                     />
                 </v-col>
 
@@ -34,7 +34,7 @@ const isScrolled = computed(() => window.scrollY > 0)
                         :class="{ 'active-section': scrollStore.activeSection === section.id }"
                         @click="scrollStore.scrollToSection(section.id)"
                     >
-                        {{ languageStore.t('navigation', section.id) }}
+                        {{ t({ section: 'navigation', key: section.id, subKey: 'text' }) }}
                     </v-btn>
                 </v-col>
 
@@ -42,10 +42,10 @@ const isScrolled = computed(() => window.scrollY > 0)
                     <v-btn
                         variant="text"
                         class="language-toggle-btn"
-                        @click="languageStore.toggleLanguage"
+                        @click="toggleLanguage"
                     >
                         <v-icon icon="mdi-translate" class="mr-1" />
-                        {{ languageStore.t('languageSwitch', 'switchToOther') }}
+                        {{ t({ section: 'languageSwitch', key: 'button', subKey: 'switchToOther' }) }}
                     </v-btn>
 
                     <v-btn
@@ -80,16 +80,16 @@ const isScrolled = computed(() => window.scrollY > 0)
                     navStore.closeMobileMenu();
                 }"
             >
-                {{ languageStore.t('navigation', section.id) }}
+                {{ t({ section: 'navigation', key: section.id, subKey: 'text' }) }}
             </v-list-item>
 
             <v-divider class="my-2" />
 
-            <v-list-item @click="languageStore.toggleLanguage">
-                <template v-slot:prepend>
+            <v-list-item @click="toggleLanguage">
+                <template #prepend>
                     <v-icon icon="mdi-translate" />
                 </template>
-                {{ languageStore.t('languageSwitch', 'otherLanguage') }}
+                {{ t({ section: 'languageSwitch', key: 'button', subKey: 'switchToOther' }) }}
             </v-list-item>
 
             <v-list-item
@@ -97,7 +97,7 @@ const isScrolled = computed(() => window.scrollY > 0)
                 :key="link.id"
                 @click="navStore.openExternalLink(link.path)"
             >
-                <template v-slot:prepend>
+                <template #prepend>
                     <v-icon v-if="link.icon" :icon="link.icon" />
                 </template>
                 {{ link.title }}

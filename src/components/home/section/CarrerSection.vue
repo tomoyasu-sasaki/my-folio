@@ -1,34 +1,176 @@
 <script setup lang="ts">
-import { useCareerStore } from '../../../stores/career'
-import { useLanguageStore } from '../../../stores/language'
-import type { CareerCategory } from '../../../stores/career'
+import { useTranslation } from '../../../composables/useTranslation'
+import type { CareerCategory } from '../../../stores/normalized/career'
+import type { SectionName } from '../../../locales/types'
 import CareerTimelineItem from '../parts/CareerTimelineItem.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useCareerData } from '../../../composables/useCareerData'
+import type { CareerItemWithTranslation } from '../../../composables/useCareerData'
 
-const careerStore = useCareerStore()
-const languageStore = useLanguageStore()
-const items = computed(() => careerStore.getAllItems)
+// レイアウト設定の型定義
+interface LayoutConfig {
+    readonly spacing: {
+        readonly padding: {
+            readonly top: {
+                readonly default: number
+                readonly mobile: number
+            }
+            readonly bottom: {
+                readonly default: number
+                readonly mobile: number
+            }
+        }
+    }
+    readonly breakpoints: {
+        readonly mobile: number
+        readonly tablet: number
+    }
+    readonly timeline: {
+        readonly maxWidth: number
+        readonly padding: {
+            readonly default: number
+            readonly mobile: number
+            readonly tablet: number
+        }
+    }
+    readonly filter: {
+        readonly button: {
+            readonly minWidth: {
+                readonly default: number
+                readonly mobile: number
+            }
+            readonly padding: number
+            readonly fontSize: {
+                readonly mobile: string
+            }
+        }
+    }
+}
+
+// カテゴリー定義
+interface CategoryItem {
+    readonly value: CareerCategory | null
+    readonly label: string
+    readonly icon: string
+}
+
+// 翻訳の型定義
+interface Translations {
+    readonly title: string
+    readonly description: string
+}
+
+const { initialize, allItems } = useCareerData()
+const { t } = useTranslation()
+
+// セクション情報の翻訳を取得する関数
+const getSectionTranslation = (key: string): string => {
+    const section: SectionName = 'career'
+    return t({ section, key: 'section', subKey: key })
+}
+
+// カテゴリー名の翻訳を取得する関数
+const getCategoryTranslation = (category: CategoryItem): string => {
+    const section: SectionName = 'career'
+    if (!category.value) {
+        return t({ section, key: 'categories', subKey: 'all' })
+    }
+    return t({ section, key: 'categories', subKey: category.value })
+}
 
 // カテゴリーフィルター
 const selectedCategory = ref<CareerCategory | null>(null)
 
 // カテゴリー一覧
-const categories = [
+const categories: readonly CategoryItem[] = [
     { value: null, label: 'all', icon: 'mdi-view-list' },
     { value: 'education', label: 'education', icon: 'mdi-school' },
     { value: 'work', label: 'work', icon: 'mdi-briefcase' },
     { value: 'life', label: 'life', icon: 'mdi-account-heart' }
 ] as const
 
-// フィルター適用後のアイテム
+// レイアウト設定
+const layoutConfig: LayoutConfig = {
+    spacing: {
+        padding: {
+            top: {
+                default: 100,
+                mobile: 60
+            },
+            bottom: {
+                default: 100,
+                mobile: 60
+            }
+        }
+    },
+    breakpoints: {
+        mobile: 600,
+        tablet: 400
+    },
+    timeline: {
+        maxWidth: 1000,
+        padding: {
+            default: 16,
+            mobile: 8,
+            tablet: 4
+        }
+    },
+    filter: {
+        button: {
+            minWidth: {
+                default: 100,
+                mobile: 50
+            },
+            padding: 16,
+            fontSize: {
+                mobile: '0.875rem'
+            }
+        }
+    }
+} as const
+
+const items = computed<CareerItemWithTranslation[]>(() => allItems.value)
+
+// カテゴリー別のアイテムをメモ化
+const itemsByCategory = computed(() => {
+    const categoryMap = new Map<CareerCategory, CareerItemWithTranslation[]>()
+    items.value.forEach(item => {
+        const category = item.category
+        const categoryItems = categoryMap.get(category) || []
+        categoryItems.push(item)
+        categoryMap.set(category, categoryItems)
+    })
+    return categoryMap
+})
+
+// フィルタリングされたアイテムをメモ化
 const filteredItems = computed(() => {
-    if (!selectedCategory.value) return items.value
-    return careerStore.getItemsByCategory(selectedCategory.value)
+    if (!selectedCategory.value) {
+        return items.value
+    }
+    return itemsByCategory.value.get(selectedCategory.value) || []
+})
+
+// 翻訳テキスト
+const translations = computed<Translations>(() => ({
+    title: getSectionTranslation('title'),
+    description: getSectionTranslation('description')
+}))
+
+onMounted(() => {
+    initialize()
 })
 </script>
 
 <template>
     <v-container id="careerContainer" class="padding">
+        <h2 class="text-h4 font-weight-bold mb-6 text-center">
+            {{ translations.title }}
+        </h2>
+        <p class="text-body-1 mb-8 text-center">
+            {{ translations.description }}
+        </p>
+
         <!-- フィルターセクション -->
         <v-row class="mb-8">
             <v-col cols="12" class="d-flex justify-center">
@@ -46,7 +188,7 @@ const filteredItems = computed(() => {
                         class="filter-btn"
                     >
                         <v-icon :icon="category.icon" class="mr-1" />
-                        <span class="btn-text">{{ languageStore.t('career', 'categories', category.label) }}</span>
+                        <span class="btn-text">{{ getCategoryTranslation(category) }}</span>
                     </v-btn>
                 </v-btn-toggle>
             </v-col>
@@ -71,8 +213,8 @@ const filteredItems = computed(() => {
 
 <style scoped>
 .padding {
-    padding-top: 100px;
-    padding-bottom: 100px;
+    padding-top: v-bind('layoutConfig.spacing.padding.top.default + "px"');
+    padding-bottom: v-bind('layoutConfig.spacing.padding.bottom.default + "px"');
 }
 
 .career-filter {
@@ -82,21 +224,21 @@ const filteredItems = computed(() => {
 }
 
 .career-timeline {
-    max-width: 1000px;
+    max-width: v-bind('layoutConfig.timeline.maxWidth + "px"');
     margin: 0 auto;
-    padding: 0 16px;
+    padding: v-bind('`0 ${layoutConfig.timeline.padding.default}px`');
     width: 100%;
 }
 
 .filter-btn {
-    min-width: 100px;
-    padding: 0 16px;
+    min-width: v-bind('layoutConfig.filter.button.minWidth.default + "px"');
+    padding: v-bind('`0 ${layoutConfig.filter.button.padding}px`');
 }
 
-@media (max-width: 600px) {
+@media (max-width: v-bind('layoutConfig.breakpoints.mobile + "px"')) {
     .padding {
-        padding-top: 60px;
-        padding-bottom: 60px;
+        padding-top: v-bind('layoutConfig.spacing.padding.top.mobile + "px"');
+        padding-bottom: v-bind('layoutConfig.spacing.padding.bottom.mobile + "px"');
     }
 
     .career-filter {
@@ -114,7 +256,7 @@ const filteredItems = computed(() => {
     }
 
     .btn-text {
-        font-size: 0.875rem;
+        font-size: v-bind('layoutConfig.filter.button.fontSize.mobile');
     }
 
     .career-timeline {
@@ -125,12 +267,12 @@ const filteredItems = computed(() => {
 
     :deep(.v-timeline) {
         width: 100%;
-        padding-left: 8px;
-        padding-right: 8px;
+        padding-left: v-bind('layoutConfig.timeline.padding.mobile + "px"');
+        padding-right: v-bind('layoutConfig.timeline.padding.mobile + "px"');
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: v-bind('layoutConfig.breakpoints.tablet + "px"')) {
     .filter-btn {
         min-width: 100%;
     }
@@ -140,8 +282,8 @@ const filteredItems = computed(() => {
     }
 
     :deep(.v-timeline) {
-        padding-left: 4px;
-        padding-right: 4px;
+        padding-left: v-bind('layoutConfig.timeline.padding.tablet + "px"');
+        padding-right: v-bind('layoutConfig.timeline.padding.tablet + "px"');
     }
 }
 </style>

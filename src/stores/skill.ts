@@ -10,7 +10,7 @@ export interface Skill {
 }
 
 // スキルカテゴリーの型定義
-export type SkillCategory = 'frontend' | 'backend' | 'database' | 'aws'
+export type SkillCategory = 'frontend' | 'backend' | 'database' | 'infrastructure'
 
 // カテゴリー情報の型定義
 export interface CategoryInfo {
@@ -29,10 +29,10 @@ export const useSkillStore = defineStore({
         const createCategoryInfo = (id: SkillCategory): CategoryInfo => {
             return {
                 id,
-                get title() {
+                get title(): string {
                     return languageStore.t('skill', 'categories', id) as string
                 },
-                get description() {
+                get description(): string {
                     return languageStore.t('skill', 'descriptions', id) as string
                 }
             }
@@ -43,7 +43,7 @@ export const useSkillStore = defineStore({
                 createCategoryInfo('frontend'),
                 createCategoryInfo('backend'),
                 createCategoryInfo('database'),
-                createCategoryInfo('aws')
+                createCategoryInfo('infrastructure')
             ] as CategoryInfo[],
             skills: [
                 // フロントエンド
@@ -67,21 +67,20 @@ export const useSkillStore = defineStore({
                 { name: 'Supabase', level: 10, likes: 10, category: 'database' },
                 // { name: 'Oracle', level: 0, likes: 0, category: 'database' },
 
-                // AWS
-                { name: 'EC2', level: 0, likes: 0, category: 'aws' },
-                { name: 'S3', level: 0, likes: 0, category: 'aws' },
-                { name: 'Lambda', level: 0, likes: 0, category: 'aws' },
-                { name: 'CloudFront', level: 0, likes: 0, category: 'aws' }
+                // インフラストラクチャ
+                { name: 'AWS', level: 10, likes: 20, category: 'infrastructure' },
+                { name: 'Firebase', level: 20, likes: 20, category: 'infrastructure' },
+                { name: 'GCP', level: 0, likes: 0, category: 'infrastructure' },
             ] as Skill[]
         }
     },
     getters: {
-        getSkillsByCategory: (state) => {
-            return (category: SkillCategory) =>
+        getSkillsByCategory: (state): (category: SkillCategory) => Skill[] => {
+            return (category: SkillCategory): Skill[] =>
                 state.skills.filter((skill) => skill.category === category)
         },
-        getCategoryInfo: (state) => {
-            return (categoryId: SkillCategory) =>
+        getCategoryInfo: (state): (categoryId: SkillCategory) => CategoryInfo | undefined => {
+            return (categoryId: SkillCategory): CategoryInfo | undefined =>
                 state.categories.find((category) => category.id === categoryId)
         }
     }

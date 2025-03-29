@@ -20,18 +20,18 @@ export const useNavigationStore = defineStore('navigation', () => {
         }
     ])
 
-    const openExternalLink = (path: string) => {
+    const openExternalLink = (path: string): void => {
         const url = router.resolve({ path }).href
         window.open(url, '_blank', 'noopener,noreferrer')
     }
 
     const isMobileMenuOpen = ref(false)
 
-    const toggleMobileMenu = () => {
+    const toggleMobileMenu = (): void => {
         isMobileMenuOpen.value = !isMobileMenuOpen.value
     }
 
-    const closeMobileMenu = () => {
+    const closeMobileMenu = (): void => {
         isMobileMenuOpen.value = false
     }
 

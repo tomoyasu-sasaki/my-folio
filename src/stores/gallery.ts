@@ -35,10 +35,10 @@ export const useGalleryStore = defineStore({
                 createdAt,
                 aiModel,
                 prompt,
-                get title() {
+                get title(): string {
                     return languageStore.t('galleryData', 'items', 'title', id) as string
                 },
-                get description() {
+                get description(): string {
                     return languageStore.t('galleryData', 'common', 'description') as string
                 }
             }
@@ -155,13 +155,14 @@ export const useGalleryStore = defineStore({
         }
     },
     getters: {
-        getAllItems: (state) => state.items,
-        getItemsByMonth: (state) => {
-            return (month: string) =>
+        getAllItems: (state): GalleryItem[] => state.items,
+        getItemsByMonth: (state): (month: string) => GalleryItem[] => {
+            return (month: string): GalleryItem[] =>
                 state.items.filter((item) => item.createdAt === month)
         },
-        getItemById: (state) => {
-            return (id: string) => state.items.find((item) => item.id === id)
+        getItemById: (state): (id: string) => GalleryItem | undefined => {
+            return (id: string): GalleryItem | undefined =>
+                state.items.find((item) => item.id === id)
         }
     }
 }) 

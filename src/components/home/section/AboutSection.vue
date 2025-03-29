@@ -1,7 +1,73 @@
 <script setup lang="ts">
-import { useLanguageStore } from '../../../stores/language'
+import { useTranslation } from '../../../composables/useTranslation'
+import type { SectionName } from '../../../locales/types'
+import { computed } from 'vue'
 
-const languageStore = useLanguageStore()
+// 翻訳関連の型定義
+interface Translations {
+    title: string
+    intro: string
+    philosophy: string
+}
+
+// ロゴ設定の型定義
+interface LogoConfig {
+    readonly src: string
+    readonly height: number
+    readonly alt: string
+}
+
+const { t } = useTranslation()
+
+// 翻訳関数の型定義
+const getTranslation = (key: string, subKey?: string, field?: string): string => {
+    const section: SectionName = 'about'
+    if (field) {
+        return t({ section, key, subKey, itemId: field })
+    }
+    return t({ section, key, subKey })
+}
+
+// 翻訳テキストを計算
+const translations = computed<Translations>(() => ({
+    title: getTranslation('introduction', 'content', 'text'),
+    intro: getTranslation('introduction', 'content', 'description'),
+    philosophy: getTranslation('philosophy', 'content', 'description')
+}))
+
+// 画像設定
+const logoConfig: LogoConfig = {
+    src: '../../../assets/logo.svg',
+    height: 200,
+    alt: 'サイトロゴ'
+} as const
+
+// レイアウト設定の型定義
+interface LayoutConfig {
+    readonly spacing: {
+        readonly padding: {
+            readonly top: number
+            readonly bottom: number
+        }
+    }
+    readonly breakpoints: {
+        readonly mobile: number
+        readonly tablet: number
+    }
+}
+
+const layoutConfig: LayoutConfig = {
+    spacing: {
+        padding: {
+            top: 100,
+            bottom: 100
+        }
+    },
+    breakpoints: {
+        mobile: 600,
+        tablet: 400
+    }
+} as const
 </script>
 
 <template>
@@ -12,13 +78,13 @@ const languageStore = useLanguageStore()
                 <div class="logo-container">
                     <v-img
                         src="../../../assets/logo.svg"
-                        height="200"
+                        :height="logoConfig.height"
                         class="logo-image"
                         cover
                         :eager="true"
-                        alt="サイトロゴ"
+                        :alt="logoConfig.alt"
                     >
-                        <template v-slot:placeholder>
+                        <template #placeholder>
                             <v-row class="fill-height" align="center" justify="center">
                                 <v-progress-circular
                                     indeterminate
@@ -31,11 +97,15 @@ const languageStore = useLanguageStore()
 
                 <!-- タイトルと説明セクション -->
                 <div class="content-section">
-                    <h1 class="text-h3 font-weight-bold mb-6">{{ languageStore.t('about', 'title') }}</h1>
+                    <h1 class="text-h3 font-weight-bold mb-6">{{ translations.title }}</h1>
+
                     <v-card variant="text" class="description-card">
                         <v-card-text>
-                            <p v-for="(_, index) in languageStore.translations.about.ja.description" :key="index" class="description-text">
-                                {{ languageStore.t('about', 'description', index.toString()) }}
+                            <p class="description-text">
+                                {{ translations.intro }}
+                            </p>
+                            <p class="description-text">
+                                {{ translations.philosophy }}
                             </p>
                         </v-card-text>
                     </v-card>
@@ -47,8 +117,8 @@ const languageStore = useLanguageStore()
 
 <style scoped>
 .about-section {
-    padding-top: 100px;
-    padding-bottom: 100px;
+    padding-top: v-bind('layoutConfig.spacing.padding.top + "px"');
+    padding-bottom: v-bind('layoutConfig.spacing.padding.bottom + "px"');
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -97,10 +167,10 @@ const languageStore = useLanguageStore()
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: v-bind('layoutConfig.breakpoints.mobile + "px"')) {
     .about-section {
-        padding-top: 60px;
-        padding-bottom: 60px;
+        padding-top: v-bind('layoutConfig.spacing.padding.top * 0.6 + "px"');
+        padding-bottom: v-bind('layoutConfig.spacing.padding.bottom * 0.6 + "px"');
         min-height: auto;
     }
 
@@ -118,7 +188,7 @@ const languageStore = useLanguageStore()
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: v-bind('layoutConfig.breakpoints.tablet + "px"')) {
     .text-h3 {
         font-size: 1.75rem !important;
     }
